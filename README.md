@@ -2,19 +2,22 @@
 <!-- Ao longo do documento, algumas partes estarão comentadas e podem ser utilizadas opcionalmente. -->
 
 <!-- Se o projeto tiver uma logo, pode ser interessante colocá-la aqui. -->
-# Nome do Projeto
+# Achados e Perdidos USP
 
 <!-- Descreva brevemente o objetivo do projeto, será a primeira parte lida ao entrar no repositório. -->
 <!-- Links essenciais (como onde o projeto está sendo hospedado se for web) podem ficar aqui também. -->
 ## 🧪 Sobre o Projeto
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vel ullamcorper nisi. Pellentesque luctus laoreet blandit. Fusce massa est, fermentum sit amet aliquet ut, viverra ut neque. Suspendisse in justo et nunc lacinia vehicula. Aliquam condimentum eros sit amet nulla auctor, non vestibulum dui volutpat. Donec vestibulum placerat consectetur. Quisque imperdiet faucibus lacus, ut fringilla neque bibendum vitae.
+Perder um pertence pelo campus (carteira, crachá, chaves, casaco) é um problema comum entre os estudantes. Muitas vezes, quem encontra um objeto não sabe onde deixá-lo ou posta em grupos informais onde a informação se perde rapidamente.
+
+O **Achados & Perdidos USP** centraliza essas informações em um só lugar, permitindo buscas rápidas por local, categoria e descrição, facilitando o reencontro de objetos com seus donos.
 
 <!-- Essa seção pode ser usada para detalhar de forma mais técnica os processos empregados no projeto. -->
 ## ⚙️ Tecnologias Utilizadas
 Lorem ipsum dolor sit amet, consectetur adipiscing elit: 
-- Pellentesque
-- Vel
-- Ullamcorper
+- **Frontend:** [React](https://reactjs.org/) + [Tailwind CSS](https://tailwindcss.com/)
+- **Backend:** [Java](https://www.java.com/) (JDK 17+) / [Spring Boot 3](https://spring.io/projects/spring-boot)
+- **Gerenciador de Dependências:** [Maven](https://maven.apache.org/)
+- **Banco de Dados:** [PostgreSQL](https://www.postgresql.org/)
 
 Pellentesque luctus laoreet blandit. Fusce massa est, fermentum sit amet aliquet ut, viverra ut neque. Suspendisse in justo et nunc lacinia vehicula. Aliquam condimentum eros sit amet nulla auctor, non vestibulum dui volutpat. Donec vestibulum placerat consectetur. Quisque imperdiet faucibus lacus, ut fringilla neque bibendum vitae.
 
