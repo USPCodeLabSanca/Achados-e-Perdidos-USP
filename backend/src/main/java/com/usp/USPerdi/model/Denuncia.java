@@ -12,7 +12,7 @@ public class Denuncia {
     // Attributes
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
+    @Column(name = "id")
     private Long idDenuncia;
 
     @Column(columnDefinition = "TEXT", nullable = false)
@@ -21,11 +21,13 @@ public class Denuncia {
     @Column(name = "data", nullable = false)
     private Instant dataDenuncia;
 
-    @Column(name = "id_denunciado", nullable = false)
-    private Long idDenunciado;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="id_denunciado", nullable = false)
+    private Usuario usrDenunciado;
 
-    @Column(name = "id_denunciante", nullable = false)
-    private Long idDenunciante;
+    @ManyToMany
+    @JoinColumn(name="id_denunciante", nullable = false)
+    private Usuario usrDenunciante;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
@@ -33,19 +35,22 @@ public class Denuncia {
     private StatusDenuncia status = StatusDenuncia.pendente;
 
     // Constructors
-    public Denuncia() {
-    }
 
-    public Denuncia(Long idDenuncia, String descricao, Instant dataDenuncia, Long idDenunciado, Long idDenunciante, StatusDenuncia status) {
+    public Denuncia(Long idDenuncia, String descricao, Instant dataDenuncia, Usuario usrDenunciado, Usuario usrDenunciante, StatusDenuncia status) {
         this.idDenuncia = idDenuncia;
         this.descricao = descricao;
         this.dataDenuncia = dataDenuncia;
-        this.idDenunciado = idDenunciado;
-        this.idDenunciante = idDenunciante;
+        this.usrDenunciado = usrDenunciado;
+        this.usrDenunciante = usrDenunciante;
         this.status = status;
     }
 
+    public Denuncia() {
+    }
+
     // Getters e Setters
+
+
     public Long getIdDenuncia() {
         return idDenuncia;
     }
@@ -70,20 +75,20 @@ public class Denuncia {
         this.dataDenuncia = dataDenuncia;
     }
 
-    public Long getIdDenunciado() {
-        return idDenunciado;
+    public Usuario getUsrDenunciado() {
+        return usrDenunciado;
     }
 
-    public void setIdDenunciado(Long idDenunciado) {
-        this.idDenunciado = idDenunciado;
+    public void setUsrDenunciado(Usuario usrDenunciado) {
+        this.usrDenunciado = usrDenunciado;
     }
 
-    public Long getIdDenunciante() {
-        return idDenunciante;
+    public Usuario getUsrDenunciante() {
+        return usrDenunciante;
     }
 
-    public void setIdDenunciante(Long idDenunciante) {
-        this.idDenunciante = idDenunciante;
+    public void setUsrDenunciante(Usuario usrDenunciante) {
+        this.usrDenunciante = usrDenunciante;
     }
 
     public StatusDenuncia getStatus() {
