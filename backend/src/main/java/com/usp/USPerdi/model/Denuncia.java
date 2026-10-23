@@ -25,7 +25,7 @@ public class Denuncia {
     @JoinColumn(name="id_denunciado", nullable = false)
     private Usuario usrDenunciado;
 
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name="id_denunciante", nullable = false)
     private Usuario usrDenunciante;
 
