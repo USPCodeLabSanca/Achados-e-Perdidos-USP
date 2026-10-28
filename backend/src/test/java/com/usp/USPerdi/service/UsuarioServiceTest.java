@@ -249,7 +249,7 @@ class UsuarioServiceTest {
     }
 
     @Test
-    public void deveFalharAtualizarUsuario_TelefoneVazio() {
+    public void deveAtualizarUsuario_ApagarTelefone() {
         Usuario usuario = new Usuario(
                 0L,
                 "João Pedro",
@@ -272,7 +272,7 @@ class UsuarioServiceTest {
 
         usuarioService.atualizarPerfil(usuario.getEmailUsp(), dto);
 
-        assertEquals("519999999", usuario.getTelefone());
+        assertNull(usuario.getTelefone());
     }
 
     @Test
