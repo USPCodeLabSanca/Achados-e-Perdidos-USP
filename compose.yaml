@@ -1,3 +1,5 @@
+# TODO:
+# 1. alterar URL DEFAULT_USER_PHOTO e na .env
 services:
   postgres:
     image: postgres:17
@@ -24,6 +26,7 @@ services:
     environment:
       DATABASE_URL: "jdbc:postgresql://postgres:5432/usperdi"
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      DEFAULT_USER_PHOTO: ${DEFAULT_USER_PHOTO:-https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg}
     depends_on:
       postgres:
         condition: service_healthy

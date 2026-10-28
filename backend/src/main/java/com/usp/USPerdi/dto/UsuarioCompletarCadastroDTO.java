@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 // Tratará quais dados aceitar do frontend e enviar para o backend (services)
-public record UsuarioCadastroDTO(
+public record UsuarioCompletarCadastroDTO(
         @NotBlank(message = "O campo 'nome' é obrigatório")
         String nome,
 
@@ -19,9 +19,9 @@ public record UsuarioCadastroDTO(
         @NotNull(message = "O campus é obrigatório")
         Campus campus,
 
-        // Telefone e Foto são opcionais, então não levam anotações de validação
-        String telefone,
+        // Telefone é opcional, então não leva anotação de validação
+        String telefone
 
-        String foto
+        // Sobre a foto: o Google, na criacao, ja envia uma foto por padrao. Entao, na criacao nao é preciso receber no DTO
 
         ){}
