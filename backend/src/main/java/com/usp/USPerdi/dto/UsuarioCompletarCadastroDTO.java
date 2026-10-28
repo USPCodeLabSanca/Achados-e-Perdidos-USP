@@ -1,6 +1,8 @@
 package com.usp.USPerdi.dto;
 
 import com.usp.USPerdi.model.Campus;
+import com.usp.USPerdi.model.StatusConta;
+import com.usp.USPerdi.model.Usuario;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,4 +26,17 @@ public record UsuarioCompletarCadastroDTO(
 
         // Sobre a foto: o Google, na criacao, ja envia uma foto por padrao. Entao, na criacao nao é preciso receber no DTO
 
-        ){}
+        ) {
+
+        public Usuario toUsuario() {
+                Usuario usr = new Usuario();
+                usr.setNome(nome());
+                usr.setCampus(campus());
+                usr.setEmailUsp(emailUsp());
+                usr.setTelefone(telefone());
+                usr.setStatusConta(StatusConta.ativa);
+
+                return usr;
+        }
+
+}

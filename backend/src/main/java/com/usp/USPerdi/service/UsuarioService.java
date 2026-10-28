@@ -37,18 +37,12 @@ public class UsuarioService {
             throw new IllegalArgumentException("Este e-mail USP já possui cadastro no sistema.");
         }
 
-        // 2. Inicializar os campos
-        Usuario usr = new Usuario();
-        usr.setNome(dto.nome());
-        usr.setCampus(dto.campus());
-        usr.setEmailUsp(dto.emailUsp());
-        usr.setTelefone(dto.telefone());
-        usr.setStatusConta(StatusConta.ativa);
+        // 2. Instanciar um usuário com as informações do DTO
+        Usuario usr = dto.toUsuario();
 
         // 2.1 Atribui a foto oficial que veio do token do Google
         // Se por algum motivo o Google não mandar, podemos definir um fallback (opcional)
         usr.setFoto(fotoDoGoogle != null ? fotoDoGoogle : defaultUserPhoto);
-
 
         // 3. Salva novo user no BD
         return usuarioRepository.save(usr);
