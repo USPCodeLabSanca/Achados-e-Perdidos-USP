@@ -21,7 +21,7 @@ public class Item {
     @Column(name="nome", nullable = false, length = 100)
     private String nome;
 
-    @Column(name="foto", columnDefinition = "TEXT")
+    @Column(name="foto", columnDefinition = "TEXT", nullable = false)
     private String foto;
 
     @Column(name="local", length = 150)
@@ -35,7 +35,7 @@ public class Item {
     @Column(name="descricao", columnDefinition = "TEXT")
     private String descricao;
 
-    @Column(name="tipo", length = 50)
+    @Column(name="tipo", length = 50, nullable = false)
     private String tipo;
 
     @Column(name="data_registro", insertable = false, updatable = false)
@@ -67,7 +67,6 @@ public class Item {
     }
 
     // Getters e Setters
-
 
     public Long getIdItem() {
         return idItem;

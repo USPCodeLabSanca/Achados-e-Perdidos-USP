@@ -26,7 +26,7 @@ public class Usuario {
     @Column(name="telefone", length = 20)
     private String telefone;
 
-    @Column(name="senha_hash", length = 255)
+    @Column(name="senha_hash", nullable = false, length = 255)
     private String senhaHash;
 
     @Enumerated(EnumType.STRING)
@@ -47,7 +47,6 @@ public class Usuario {
 
     // Constructor
 
-
     public Usuario(Long id, String nome, String emailUsp, String telefone, String senhaHash, Campus campus, StatusConta statusConta, String foto, Instant dataCadastro) {
         this.id = id;
         this.nome = nome;
@@ -64,7 +63,6 @@ public class Usuario {
     }
 
     // Getters e Setters
-
 
     public Long getId() {
         return id;
@@ -138,5 +136,3 @@ public class Usuario {
         this.dataCadastro = dataCadastro;
     }
 }
-
-
