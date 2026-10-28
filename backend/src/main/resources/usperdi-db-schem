@@ -79,13 +79,12 @@ CREATE TABLE public.recupera (
 );
 ALTER TABLE public.recupera OWNER TO postgres;
 
--- TABLE: usuario
+-- TABLE: usuario (SENHA REMOVIDA)
 CREATE TABLE public.usuario (
     id bigint NOT NULL,
     nome character varying(100) NOT NULL,
     email_usp character varying(100) NOT NULL,
     telefone character varying(20),
-    senha_hash character varying(255) NOT NULL,
     campus public.campus_enum,
     status_da_conta public.status_conta_enum DEFAULT 'ativa'::public.status_conta_enum,
     foto text,
