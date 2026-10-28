@@ -7,12 +7,15 @@ import com.usp.USPerdi.model.StatusConta;
 import com.usp.USPerdi.model.Usuario;
 import com.usp.USPerdi.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 public class UsuarioService {
 
     // Trocar URL depois
@@ -27,7 +30,7 @@ public class UsuarioService {
 
     // CREATE
     @Transactional
-    public Usuario completarCadastro(UsuarioCompletarCadastroDTO dto, String fotoDoGoogle){
+    public Usuario completarCadastro(@Valid UsuarioCompletarCadastroDTO dto, String fotoDoGoogle){
 
         // 1. Verificar no BD se ja ha alguem cadastrado com esse email usp
         if (usuarioRepository.findByEmailUsp(dto.emailUsp()).isPresent()){
