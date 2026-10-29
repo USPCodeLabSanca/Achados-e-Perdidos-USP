@@ -2,6 +2,7 @@ package com.usp.USPerdi.service;
 
 import com.usp.USPerdi.dto.UsuarioAtualizarPerfilDTO;
 import com.usp.USPerdi.dto.UsuarioCompletarCadastroDTO;
+import com.usp.USPerdi.dto.UsuarioResponseDTO;
 import com.usp.USPerdi.model.Campus;
 import com.usp.USPerdi.model.StatusConta;
 import com.usp.USPerdi.model.Usuario;
@@ -18,7 +19,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class UsuarioService {
 
-    // Trocar URL depois
+    // TODO: Trocar URL depois
     @Value("${DEFAULT_USER_PHOTO:https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg}")
     private String defaultUserPhoto;
 
@@ -28,9 +29,23 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
+    private UsuarioResponseDTO converterParaDTO(Usuario usr) {
+        return new UsuarioResponseDTO(
+                usr.getId(),
+                usr.getNome(),
+                usr.getEmailUsp(),
+                usr.getFoto(),
+                usr.getTelefone(),
+                usr.getCampus(),
+                usr.getStatusConta(),
+                usr.getDataCadastro()
+        );
+    }
+
+
     // CREATE
     @Transactional
-    public Usuario completarCadastro(@Valid UsuarioCompletarCadastroDTO dto, String fotoDoGoogle){
+    public UsuarioResponseDTO completarCadastro(@Valid UsuarioCompletarCadastroDTO dto, String fotoDoGoogle){
 
         // 1. Verificar no BD se ja ha alguem cadastrado com esse email usp
         if (usuarioRepository.findByEmailUsp(dto.emailUsp()).isPresent()){
@@ -45,27 +60,38 @@ public class UsuarioService {
         usr.setFoto(fotoDoGoogle != null ? fotoDoGoogle : defaultUserPhoto);
 
         // 3. Salva novo user no BD
-        return usuarioRepository.save(usr);
+        Usuario usrSalvo = usuarioRepository.save(usr);
+
+        return converterParaDTO(usrSalvo);
     }
 
     // READ
+
+    // Retornamos USUARIO porque eh utilizado no ItemService
     public Usuario buscarPorEmailUSP(String emailUsp){
         return usuarioRepository.findByEmailUsp(emailUsp)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com o e-mail: " + emailUsp));
     }
 
-    public Page<Usuario> buscaPorNome(String nome, Pageable pageable){
-        // Caso nao encontre ninguem, retorna uma pagina vazia (lista vazia)
-        return usuarioRepository.findByNomeContainingIgnoreCase(nome, pageable);
+    // Para exibicao do perfil no front-end
+    public UsuarioResponseDTO obterPerfilUsuario(String emailUsp) {
+        Usuario usr = buscarPorEmailUSP(emailUsp);
+        return converterParaDTO(usr);
     }
 
-    public Page<Usuario> buscaPorStatusDaConta(StatusConta status, Pageable pageable){
-        return usuarioRepository.findByStatusConta(status, pageable);
+    public Page<UsuarioResponseDTO> buscaPorNome(String nome, Pageable pageable){
+        return usuarioRepository.findByNomeContainingIgnoreCase(nome, pageable)
+                .map(this::converterParaDTO);
+    }
+
+    public Page<UsuarioResponseDTO> buscaPorStatusDaConta(StatusConta status, Pageable pageable){
+        return usuarioRepository.findByStatusConta(status, pageable)
+                .map(this::converterParaDTO);
     }
 
     // UPDATE
     @Transactional
-    public Usuario atualizarPerfil(String emailUsp, UsuarioAtualizarPerfilDTO dto){
+    public UsuarioResponseDTO atualizarPerfil(String emailUsp, UsuarioAtualizarPerfilDTO dto) {
         // Obs: emailUsp será recebido do controller, pelo Spring Security
         // Nao usa o ID por questao de segurança
 
@@ -73,11 +99,11 @@ public class UsuarioService {
 
         Usuario usr = buscarPorEmailUSP(emailUsp);
 
-        if (dto.nome() != null && !(dto.nome().isBlank())){
+        if (dto.nome() != null && !(dto.nome().isBlank())) {
             usr.setNome(dto.nome());
         }
 
-        if (dto.campus() != null){
+        if (dto.campus() != null) {
             usr.setCampus(dto.campus());
         }
 
@@ -86,7 +112,9 @@ public class UsuarioService {
             usr.setTelefone(dto.telefone().isBlank() ? null : dto.telefone());
         }
 
-        return usr;
+        // Salva e devolve o DTO
+        usuarioRepository.save(usr);
+        return converterParaDTO(usr);
     }
 
     // DELETE
