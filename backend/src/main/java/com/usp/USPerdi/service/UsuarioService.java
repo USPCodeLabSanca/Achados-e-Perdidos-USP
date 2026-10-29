@@ -29,20 +29,6 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    private UsuarioResponseDTO converterParaDTO(Usuario usr) {
-        return new UsuarioResponseDTO(
-                usr.getId(),
-                usr.getNome(),
-                usr.getEmailUsp(),
-                usr.getFoto(),
-                usr.getTelefone(),
-                usr.getCampus(),
-                usr.getStatusConta(),
-                usr.getDataCadastro()
-        );
-    }
-
-
     // CREATE
     @Transactional
     public UsuarioResponseDTO completarCadastro(@Valid UsuarioCompletarCadastroDTO dto, String fotoDoGoogle){
@@ -62,7 +48,7 @@ public class UsuarioService {
         // 3. Salva novo user no BD
         usuarioRepository.save(usr);
 
-        return converterParaDTO(usr);
+        return UsuarioResponseDTO.fromUsuario(usr);
     }
 
     // READ
@@ -90,17 +76,17 @@ public class UsuarioService {
     // Para exibicao do perfil no front-end
     public UsuarioResponseDTO obterPerfilUsuario(String emailUsp) {
         Usuario usr = buscarPorEmailUSP(emailUsp);
-        return converterParaDTO(usr);
+        return UsuarioResponseDTO.fromUsuario(usr);
     }
 
     public Page<UsuarioResponseDTO> buscaPorNome(String nome, Pageable pageable){
         return usuarioRepository.findByNomeContainingIgnoreCase(nome, pageable)
-                .map(this::converterParaDTO);
+                .map(UsuarioResponseDTO::fromUsuario);
     }
 
     public Page<UsuarioResponseDTO> buscaPorStatusDaConta(StatusConta status, Pageable pageable){
         return usuarioRepository.findByStatusConta(status, pageable)
-                .map(this::converterParaDTO);
+                .map(UsuarioResponseDTO::fromUsuario);
     }
 
     // UPDATE
@@ -128,7 +114,7 @@ public class UsuarioService {
 
         // Salva e devolve o DTO
         usuarioRepository.save(usr);
-        return converterParaDTO(usr);
+        return UsuarioResponseDTO.fromUsuario(usr);
     }
 
     // DELETE
