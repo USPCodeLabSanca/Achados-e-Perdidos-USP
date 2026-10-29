@@ -19,9 +19,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     // Busca itens filtrando pelo status e ordenando pela data de ocorrência (mais recentes primeiro)
     Page<Item> findByStatusOrderByDataOcorrenciaDesc(StatusItem status, Pageable pageable);
 
-    // Busca itens filtrando pelo status e ordenando pela data de registro (mais recentes primeiro)
-    Page<Item> findByStatusOrderByDataRegistroDesc(StatusItem status, Pageable pageable);
-
     // Busca itens por um local aproximado
     Page<Item> findByLocalContainingIgnoreCase(String local, Pageable pageable);
 
