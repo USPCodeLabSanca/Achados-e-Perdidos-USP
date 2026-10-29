@@ -45,7 +45,8 @@ CREATE TABLE public.denuncia (
     data timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     status public.status_denuncia_enum DEFAULT 'pendente'::public.status_denuncia_enum NOT NULL,
     id_denunciado bigint NOT NULL,
-    id_denunciante bigint NOT NULL
+    id_denunciante bigint NOT NULL,
+    id_item_envolvido bigint -- Novo campo opcional (permite NULL)
 );
 ALTER TABLE public.denuncia OWNER TO postgres;
 ALTER TABLE public.denuncia ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -113,6 +114,10 @@ ALTER TABLE ONLY public.denuncia
 
 ALTER TABLE ONLY public.denuncia
     ADD CONSTRAINT fk_denuncia_id_denunciante FOREIGN KEY (id_denunciante) REFERENCES public.usuario(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+-- NOVA FOREIGN KEY PARA O ITEM ENVOLVIDO
+ALTER TABLE ONLY public.denuncia
+    ADD CONSTRAINT fk_denuncia_id_item_envolvido FOREIGN KEY (id_item_envolvido) REFERENCES public.item(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 ALTER TABLE ONLY public.item
     ADD CONSTRAINT fk_item_usuario_id FOREIGN KEY (usuario_id) REFERENCES public.usuario(id) ON UPDATE CASCADE ON DELETE CASCADE;

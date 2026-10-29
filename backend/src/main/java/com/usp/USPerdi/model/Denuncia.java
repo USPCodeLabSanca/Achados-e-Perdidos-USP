@@ -34,15 +34,21 @@ public class Denuncia {
     @Column(name = "status", nullable = false)
     private StatusDenuncia status = StatusDenuncia.pendente;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="id_item_envolvido", nullable = true) // <-- Opcional!
+    private Item itemEnvolvido;
+
+
     // Constructors
 
-    public Denuncia(Long idDenuncia, String descricao, Instant dataDenuncia, Usuario usrDenunciado, Usuario usrDenunciante, StatusDenuncia status) {
+    public Denuncia(Long idDenuncia, String descricao, Instant dataDenuncia, Usuario usrDenunciado, Usuario usrDenunciante, StatusDenuncia status, Item itemEnvolvido) {
         this.idDenuncia = idDenuncia;
         this.descricao = descricao;
         this.dataDenuncia = dataDenuncia;
         this.usrDenunciado = usrDenunciado;
         this.usrDenunciante = usrDenunciante;
         this.status = status;
+        this.itemEnvolvido = itemEnvolvido;
     }
 
     public Denuncia() {
@@ -97,5 +103,13 @@ public class Denuncia {
 
     public void setStatus(StatusDenuncia status) {
         this.status = status;
+    }
+
+    public Item getItemEnvolvido() {
+        return itemEnvolvido;
+    }
+
+    public void setItemEnvolvido(Item itemEnvolvido) {
+        this.itemEnvolvido = itemEnvolvido;
     }
 }
