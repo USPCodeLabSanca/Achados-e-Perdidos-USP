@@ -52,4 +52,30 @@ public class FileStorageService {
             throw new RuntimeException("Falha ao armazenar a imagem.", e);
         }
     }
+
+    // Apagar do disco
+    public void apagarArquivo(String urlArquivo) {
+        if (urlArquivo == null || urlArquivo.trim().isEmpty()) {
+            return; // Se não tem URL não faz nada
+        }
+
+        try {
+            // 1. Extrai apenas o nome do arquivo da URL.
+            // Pega tudo que vem depois da última barra ("/")
+            String nomeArquivo = urlArquivo.substring(urlArquivo.lastIndexOf("/") + 1);
+
+            // 2. Aponta para o arquivo exato dentro da pasta de uploads
+            Path arquivoFisico = pastaUploads.resolve(nomeArquivo);
+
+            // 3. Apaga o arquivo apenas se ele existir (deleteIfExists).
+            // Isso evita que a API quebre (Erro 500) caso o arquivo já tenha sido deletado manualmente do servidor.
+            Files.deleteIfExists(arquivoFisico);
+
+        } catch (IOException e) {
+            // Apenas exibimos o erro no log.
+            // Não lançamos RuntimeException aqui para não dar "Rollback" no banco de dados
+            System.err.println("Aviso: Falha ao apagar o arquivo do disco: " + urlArquivo);
+            e.printStackTrace();
+        }
+    }
 }
