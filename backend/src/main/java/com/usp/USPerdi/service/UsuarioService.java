@@ -60,9 +60,9 @@ public class UsuarioService {
         usr.setFoto(fotoDoGoogle != null ? fotoDoGoogle : defaultUserPhoto);
 
         // 3. Salva novo user no BD
-        Usuario usrSalvo = usuarioRepository.save(usr);
+        usuarioRepository.save(usr);
 
-        return converterParaDTO(usrSalvo);
+        return converterParaDTO(usr);
     }
 
     // READ

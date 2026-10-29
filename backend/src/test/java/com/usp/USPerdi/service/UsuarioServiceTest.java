@@ -2,6 +2,7 @@ package com.usp.USPerdi.service;
 
 import com.usp.USPerdi.dto.UsuarioAtualizarPerfilDTO;
 import com.usp.USPerdi.dto.UsuarioCompletarCadastroDTO;
+import com.usp.USPerdi.dto.UsuarioResponseDTO;
 import com.usp.USPerdi.model.Campus;
 import com.usp.USPerdi.model.StatusConta;
 import com.usp.USPerdi.model.Usuario;
@@ -151,10 +152,10 @@ class UsuarioServiceTest {
         when(usuarioRepository.findByNomeContainingIgnoreCase("joao", pageable))
                 .thenReturn(pagina);
 
-        Page<Usuario> resultado = usuarioService.buscaPorNome("joao", pageable);
+        Page<UsuarioResponseDTO> resultado = usuarioService.buscaPorNome("joao", pageable);
 
         assertThat(resultado.getContent()).hasSize(1);
-        assertThat(resultado.getContent().get(0).getNome()).isEqualTo("João Pedro");
+        assertThat(resultado.getContent().get(0).nome()).isEqualTo("João Pedro");
         verify(usuarioRepository).findByNomeContainingIgnoreCase("joao", pageable);
     }
 
@@ -165,7 +166,7 @@ class UsuarioServiceTest {
         when(usuarioRepository.findByNomeContainingIgnoreCase("joao", pageable))
                 .thenReturn(Page.empty(pageable));
 
-        Page<Usuario> resultado = usuarioService.buscaPorNome("joao", pageable);
+        Page<UsuarioResponseDTO> resultado = usuarioService.buscaPorNome("joao", pageable);
 
         assertThat(resultado.getContent()).hasSize(0);
         assertThat(resultado.getContent().isEmpty()).isTrue();
@@ -184,10 +185,10 @@ class UsuarioServiceTest {
         when(usuarioRepository.findByStatusConta(StatusConta.ativa, pageable))
                 .thenReturn(pagina);
 
-        Page<Usuario> resultado = usuarioService.buscaPorStatusDaConta(StatusConta.ativa, pageable);
+        Page<UsuarioResponseDTO> resultado = usuarioService.buscaPorStatusDaConta(StatusConta.ativa, pageable);
 
         assertThat(resultado.getContent()).hasSize(1);
-        assertThat(resultado.getContent().get(0).getNome()).isEqualTo("João Pedro");
+        assertThat(resultado.getContent().get(0).nome()).isEqualTo("João Pedro");
         verify(usuarioRepository).findByStatusConta(StatusConta.ativa, pageable);
     }
 
