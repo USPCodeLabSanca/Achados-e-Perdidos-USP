@@ -67,12 +67,26 @@ public class UsuarioService {
 
     // READ
 
+    // ####################
+    // Metodos Internos (BACKEND)
+    // ####################
+
     // Retornamos USUARIO porque eh utilizado no ItemService
     public Usuario buscarPorEmailUSP(String emailUsp){
         return usuarioRepository.findByEmailUsp(emailUsp)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com o e-mail: " + emailUsp));
     }
 
+    public Usuario buscarPorId(Long id){
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com o ID: " + id));
+    }
+
+
+
+    // ####################
+    // METODOS EXTERNOS (FRONTEND)
+    // ####################
     // Para exibicao do perfil no front-end
     public UsuarioResponseDTO obterPerfilUsuario(String emailUsp) {
         Usuario usr = buscarPorEmailUSP(emailUsp);

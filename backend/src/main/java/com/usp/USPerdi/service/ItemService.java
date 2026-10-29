@@ -53,6 +53,19 @@ public class ItemService {
 
     // CREATE
 
+    // ####################
+    // Metodos Internos (BACKEND)
+    // ####################
+
+    public Item buscarPorId(Long id){
+        return itemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item não encontrado com o ID: " + id));}
+
+
+    // ####################
+    // METODOS EXTERNOS (FRONTEND)
+    // ####################
+
     @Transactional
     public ItemResponseDTO cadastrarNovoItem(String emailUsp, ItemCadastrarNovoDTO dto, MultipartFile imagem, StatusItem status){
 

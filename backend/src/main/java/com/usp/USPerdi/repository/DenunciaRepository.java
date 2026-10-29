@@ -22,4 +22,7 @@ public interface DenunciaRepository extends JpaRepository<Denuncia, Long> {
     // Busca denúncias contra um usuário e que ainda estão pendentes
     Page<Denuncia> findByUsrDenunciadoAndStatus(Usuario denunciado, StatusDenuncia status, Pageable pageable);
 
+    // Bloqueia spam apenas se a denúncia anterior ainda estiver na fila de análise
+    boolean existsByUsrDenuncianteAndUsrDenunciadoAndStatus(Usuario denunciante, Usuario denunciado, StatusDenuncia status);
+
 }
