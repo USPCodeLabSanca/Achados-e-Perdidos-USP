@@ -15,16 +15,21 @@ import java.util.UUID;
 public class FileStorageService {
 
     // Define que a pasta vai se chamar "uploads" na raiz do backend
-    private final Path pastaUploads = Paths.get("uploads");
+    private Path pastaUploads = Paths.get("uploads");
 
     // TODO: trocar URL BASE
-    @Value("${API_BASE_URL:http://localhost:8080}")
-    private String apiBaseUrl;
+    private final String apiBaseUrl;
 
-    public FileStorageService() {
+    public FileStorageService(
+            @Value("${API_BASE_URL:http://localhost:8080}") String apiBaseUrl,
+            @Value("${app.uploads-dir:uploads}") String pastaUploads
+    ) {
+        this.apiBaseUrl = apiBaseUrl;
+        this.pastaUploads = Paths.get(pastaUploads);
+
         try {
             // Cria a pasta automaticamente quando o Spring iniciar
-            Files.createDirectories(pastaUploads);
+            Files.createDirectories(this.pastaUploads);
         } catch (IOException e) {
             throw new RuntimeException("Não foi possível criar a pasta para upload de imagens.", e);
         }
