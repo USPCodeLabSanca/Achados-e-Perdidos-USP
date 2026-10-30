@@ -1,5 +1,6 @@
 package com.usp.USPerdi.dto;
 
+import com.usp.USPerdi.model.Item;
 import com.usp.USPerdi.model.StatusItem;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,4 +26,21 @@ public record ItemCadastrarNovoDTO(
 
         @PastOrPresent(message = "A data da ocorrência não pode estar no futuro")
         LocalDate dataOcorrencia
-) {}
+) {
+
+        // Converte o DTO para um Item
+        // Não atribui status, imagem e usuário
+        // Pois não são informações do DTO
+        public Item toItem() {
+                Item item = new Item();
+
+                item.setNome(nome());
+                item.setDescricao(descricao());
+                item.setLocal(local());
+                item.setTipo(tipo());
+                item.setDataOcorrencia(dataOcorrencia());
+
+                return item;
+        }
+
+}

@@ -59,19 +59,15 @@ public class ItemService {
         // 3. Converte imagem em URL
         String imgURL = fileStorageService.salvarArquivo(imagem);
 
-        Item item = new Item();
+        Item item = dto.toItem();
 
-        item.setNome(dto.nome());
-        item.setDescricao(dto.descricao());
-        item.setLocal(dto.local());
-        item.setTipo(dto.tipo());
         item.setStatus(status);
         item.setUsuario(usr);
-        item.setDataOcorrencia(dto.dataOcorrencia());
         item.setFoto(imgURL);
 
-        Item itemSalvo =  itemRepository.save(item);
-        return ItemResponseDTO.fromItem(itemSalvo);
+        itemRepository.save(item);
+
+        return ItemResponseDTO.fromItem(item);
     }
 
     // READ
@@ -136,8 +132,9 @@ public class ItemService {
             item.setDataOcorrencia(dto.dataOcorrencia());
         }
 
-        // 4. Salva e devolve o DTO de leitura formatado e blindado
-        itemRepository.save(item);
+        // Salvamento é automático, por conta da anotação
+        // @Transactional
+        // 4. Devolve o DTO de leitura formatado e blindado
         return ItemResponseDTO.fromItem(item);
 
     }
@@ -166,7 +163,6 @@ public class ItemService {
 
         // 5. Substitui a URL na entidade e salva
         item.setFoto(novaUrlFoto);
-        itemRepository.save(item);
 
         // 6. Devolve o item formatado em DTO para a tela já atualizar a foto em tempo real
         return ItemResponseDTO.fromItem(item);
