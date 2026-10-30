@@ -30,27 +30,6 @@ public class ItemService {
         this.fileStorageService = fileStorageService;
     }
 
-    private ItemResponseDTO converterParaDTO(Item item) {
-        return new ItemResponseDTO(
-                item.getIdItem(),
-                item.getNome(),
-                item.getFoto(),
-                item.getLocal(),
-                item.getStatus(),
-                item.getDescricao(),
-                item.getTipo(),
-                item.getDataOcorrencia(),
-
-                // Puxamos apenas o que o frontend precisa do usuário
-                item.getUsuario().getNome(),
-                item.getUsuario().getEmailUsp(),
-                item.getUsuario().getTelefone(),
-                item.getUsuario().getFoto()
-        );
-    }
-
-
-
     // CREATE
 
     // ####################
@@ -92,30 +71,30 @@ public class ItemService {
         item.setFoto(imgURL);
 
         Item itemSalvo =  itemRepository.save(item);
-        return converterParaDTO(itemSalvo);
+        return ItemResponseDTO.fromItem(itemSalvo);
     }
 
     // READ
 
     public Page<ItemResponseDTO> buscaTodosPorNome(String nome, Pageable pageable){
         return itemRepository.findByNomeContainingIgnoreCase(nome, pageable)
-                .map(this::converterParaDTO);
+                .map(ItemResponseDTO::fromItem);
     }
 
     public Page<ItemResponseDTO> buscaTodosPorUsuario(String emailUsp, Pageable pageable){
         Usuario usr = usuarioService.buscarPorEmailUSP(emailUsp);
         return itemRepository.findByUsuario(usr, pageable)
-                .map(this::converterParaDTO);
+                .map(ItemResponseDTO::fromItem);
     }
 
     public Page<ItemResponseDTO> buscaMaisRecentesPorStatus(StatusItem status, Pageable pageble){
         return itemRepository.findByStatusOrderByDataOcorrenciaDesc(status, pageble)
-                .map(this::converterParaDTO);
+                .map(ItemResponseDTO::fromItem);
     }
 
     public Page<ItemResponseDTO> buscarPorLocal(String local, Pageable pageable){
         return itemRepository.findByLocalContainingIgnoreCase(local, pageable)
-                .map(this::converterParaDTO);
+                .map(ItemResponseDTO::fromItem);
     }
 
     // UPDATE
@@ -159,7 +138,7 @@ public class ItemService {
 
         // 4. Salva e devolve o DTO de leitura formatado e blindado
         itemRepository.save(item);
-        return converterParaDTO(item);
+        return ItemResponseDTO.fromItem(item);
 
     }
 
@@ -190,7 +169,7 @@ public class ItemService {
         itemRepository.save(item);
 
         // 6. Devolve o item formatado em DTO para a tela já atualizar a foto em tempo real
-        return converterParaDTO(item);
+        return ItemResponseDTO.fromItem(item);
     }
 
     @Transactional
