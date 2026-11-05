@@ -66,7 +66,7 @@ public class DenunciaService {
         }
 
 
-        denuncia = denunciaRepository.save(denuncia);
+        denunciaRepository.save(denuncia);
 
         return DenunciaResponseDTO.fromDenuncia(denuncia);
     }
@@ -164,6 +164,7 @@ public class DenunciaService {
     }
 
 
+    @Transactional
     public DenunciaResponseDTO alterarStatusDenuncia(Long idDenuncia, DenunciaJulgarDTO dto) {
         // OBS: a verificação de administrador ficará no controller (role)
 
@@ -178,7 +179,6 @@ public class DenunciaService {
 
         // 3. Atualiza o status
         denuncia.setStatus(dto.novoStatus());
-        denuncia = denunciaRepository.save(denuncia);
 
         // 4. Converte e retorna
         return DenunciaResponseDTO.fromDenuncia(denuncia);
