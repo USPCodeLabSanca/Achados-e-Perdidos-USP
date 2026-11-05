@@ -33,44 +33,9 @@ public class DenunciaService {
         this.itemService = itemService;
     }
 
-    // Converte objeto em DTO para enviar ao front
-    private DenunciaResponseDTO converterDenunciaParaDTO(Denuncia denuncia){
-
-        // 1. Se item não existir, fica null
-        Long idItem = null;
-        String nomeItem = null;
-
-        if (denuncia.getItemEnvolvido() != null) {
-            idItem = denuncia.getItemEnvolvido().getIdItem();
-            nomeItem = denuncia.getItemEnvolvido().getNome();
-        }
-
-        // 2. Monta o DTO
-        return new DenunciaResponseDTO(
-                denuncia.getIdDenuncia(),
-                denuncia.getDescricao(),
-                denuncia.getDataDenuncia(),
-                denuncia.getStatus(),
-
-                // Dados do Denunciante (Quem abriu a denúncia)
-                denuncia.getUsrDenunciante().getId(),
-                denuncia.getUsrDenunciante().getNome(),
-
-                // Dados do Denunciado (O acusado)
-                denuncia.getUsrDenunciado().getId(),
-                denuncia.getUsrDenunciado().getNome(),
-
-                // Dados do Item Opcional
-                idItem,
-                nomeItem
-        );
-
-    }
-
-
     // CREATE
 
-        @Transactional
+    @Transactional
     public DenunciaResponseDTO criarNovaDenuncia(DenunciaCriarNovaDTO dto, String emailUspLogado){
 
         Usuario usrDenunciado = usuarioService.buscarPorId(dto.idDenunciado());
@@ -103,7 +68,7 @@ public class DenunciaService {
 
         denuncia = denunciaRepository.save(denuncia);
 
-        return converterDenunciaParaDTO(denuncia);
+        return DenunciaResponseDTO.fromDenuncia(denuncia);
     }
 
 
@@ -122,26 +87,26 @@ public class DenunciaService {
         Usuario usrDenunciado = usuarioService.buscarPorId(idDenunciado);
 
         return denunciaRepository.findByUsrDenunciado(usrDenunciado, pageable)
-                .map(this::converterDenunciaParaDTO);
+                .map(DenunciaResponseDTO::fromDenuncia);
     }
 
     public Page<DenunciaResponseDTO> buscarDenunciasFeitasPorUsuario(Long idUsuario, Pageable pageable) {
         Usuario usrDenunciante = usuarioService.buscarPorId(idUsuario);
 
         return denunciaRepository.findByUsrDenunciante(usrDenunciante, pageable)
-                .map(this::converterDenunciaParaDTO);
+                .map(DenunciaResponseDTO::fromDenuncia);
     }
 
     public Page<DenunciaResponseDTO> buscarTodasPorStatus(StatusDenuncia status, Pageable pageable) {
         return denunciaRepository.findByStatus(status, pageable)
-                .map(this::converterDenunciaParaDTO);
+                .map(DenunciaResponseDTO::fromDenuncia);
     }
 
     public Page<DenunciaResponseDTO> buscarDenunciasRecebidasPorStatus(Long idUsuario, StatusDenuncia status, Pageable pageable) {
         Usuario usrDenunciado = usuarioService.buscarPorId(idUsuario);
 
         return denunciaRepository.findByUsrDenunciadoAndStatus(usrDenunciado, status, pageable)
-                .map(this::converterDenunciaParaDTO);
+                .map(DenunciaResponseDTO::fromDenuncia);
     }
 
     // UPDATE
@@ -172,7 +137,7 @@ public class DenunciaService {
         denuncia.setDescricao(dto.descricao());
         denunciaRepository.save(denuncia);
 
-        return converterDenunciaParaDTO(denuncia);
+        return DenunciaResponseDTO.fromDenuncia(denuncia);
     }
 
     // DELETE
@@ -216,6 +181,6 @@ public class DenunciaService {
         denuncia = denunciaRepository.save(denuncia);
 
         // 4. Converte e retorna
-        return converterDenunciaParaDTO(denuncia);
+        return DenunciaResponseDTO.fromDenuncia(denuncia);
     }
 }
