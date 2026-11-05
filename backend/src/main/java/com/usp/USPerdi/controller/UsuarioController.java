@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -28,7 +30,12 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity<UsuarioResponseDTO> criarUsuario(
             @Valid @RequestBody UsuarioCompletarCadastroDTO dto,
-            @RequestHeader(value = "foto-google", required = false) String fotoGoogle){
+            @AuthenticationPrincipal Jwt jwt){
+
+        String fotoGoogle = null;
+        if (jwt != null){
+            fotoGoogle = jwt.getClaimAsString("picture");
+        }
 
         return ResponseEntity.status(201).body(usuarioService.completarCadastro(dto, fotoGoogle));
     }
@@ -67,11 +74,13 @@ public class UsuarioController {
 
     // UPDATE
 
-    @PatchMapping("/{emailUsp}")
+    @PatchMapping
     public ResponseEntity<UsuarioResponseDTO> atualizarPerfil(
-            @PathVariable String emailUsp,
-            @Valid @RequestBody UsuarioAtualizarPerfilDTO dto
+            @Valid @RequestBody UsuarioAtualizarPerfilDTO dto,
+            @AuthenticationPrincipal Jwt jwt // extrai a identidade de quem mandou a requisicao
             ){
+
+        String emailUsp = jwt.getClaimAsString("email");
 
         UsuarioResponseDTO usuarioAtualizado = usuarioService.atualizarPerfil(emailUsp, dto);
 
@@ -80,10 +89,13 @@ public class UsuarioController {
 
     // DELETE
 
-    @DeleteMapping("/{emailUsp}")
+    @DeleteMapping
     public ResponseEntity<Void> desativarConta(
-            @PathVariable String emailUsp
+            @AuthenticationPrincipal Jwt jwt
     ){
+
+        String emailUsp = jwt.getClaimAsString("email");
+
         usuarioService.desativarConta(emailUsp);
 
         // Retorna Status 204 (No Content) indicando que deu certo e a bandeja está vazia
