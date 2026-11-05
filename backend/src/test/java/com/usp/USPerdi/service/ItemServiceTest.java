@@ -109,6 +109,44 @@ class ItemServiceTest {
     }
 
     @Test
+    void deveCadastrarNovoItem_Perdido_SemFoto() {
+        String emailUsp = "email@usp.br";
+        Usuario usuario = new Usuario();
+        usuario.setEmailUsp(emailUsp);
+        MultipartFile mockFile = mock(MultipartFile.class);
+
+        ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
+                "Carrinho Hot wheels",
+                "Redondo",
+                "Perderam um carrinho no redondo",
+                "Brinquedo",
+                LocalDate.now()
+        );
+
+        when(mockFile.isEmpty())
+                .thenReturn(true);
+
+        when(usuarioService.buscarPorEmailUSP(emailUsp))
+                .thenReturn(usuario);
+
+        itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.perdido);
+
+        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(captor.capture());
+
+        Item salvo = captor.getValue();
+
+        Assertions.assertEquals(usuario, salvo.getUsuario());
+        Assertions.assertEquals(StatusItem.perdido, salvo.getStatus());
+        Assertions.assertEquals(null, salvo.getFoto());
+        Assertions.assertEquals(dto.nome(), salvo.getNome());
+        Assertions.assertEquals(dto.local(), salvo.getLocal());
+        Assertions.assertEquals(dto.descricao(), salvo.getDescricao());
+        Assertions.assertEquals(dto.tipo(), salvo.getTipo());
+        Assertions.assertEquals(dto.dataOcorrencia(), salvo.getDataOcorrencia());
+    }
+
+    @Test
     void deveCadastrarNovoItem_Achado() {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
@@ -150,6 +188,30 @@ class ItemServiceTest {
     }
 
     @Test
+    void deveFalharCadastrarNovoItem_Achado_SemFoto() {
+        String emailUsp = "email@usp.br";
+        Usuario usuario = new Usuario();
+        usuario.setEmailUsp(emailUsp);
+        MultipartFile mockFile = mock(MultipartFile.class);
+
+        ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
+                "Carrinho Hot wheels",
+                "Redondo",
+                "Perderam um carrinho no redondo",
+                "Brinquedo",
+                LocalDate.now()
+        );
+
+        when(mockFile.isEmpty())
+                .thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado));
+
+        verify(itemRepository, never()).save(any());
+    }
+
+    @Test
     void deveFalharCadastrarNovoItem_ItemRecuperado() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> itemService.cadastrarNovoItem("email@usp.br", mock(ItemCadastrarNovoDTO.class), mock(MultipartFile.class), StatusItem.recuperado));
@@ -183,7 +245,7 @@ class ItemServiceTest {
                 .thenReturn(usuario);
 
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mockFile, StatusItem.perdido));
+                () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mockFile, StatusItem.encontrado));
     }
 
     @Test
@@ -197,7 +259,7 @@ class ItemServiceTest {
                 .thenReturn(usuario);
 
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mockFile, StatusItem.perdido));
+                () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mockFile, StatusItem.encontrado));
     }
 
     @Test

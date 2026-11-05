@@ -56,13 +56,16 @@ public class ItemService {
         // 1. Encontra usuario no BD
         Usuario usr = usuarioService.buscarPorEmailUSP(emailUsp); // Exception ja lancada no service
 
+        String imgURL = null;
         // 2. Valida imagem
-        if (imagem == null || imagem.isEmpty()){
+        // Item encontrado precisa de foto
+        // Item não encontrado pode não ter
+        if ((imagem == null || imagem.isEmpty()) && status == StatusItem.encontrado){
             throw new IllegalArgumentException("A foto do item é obrigatória para o cadastro.");
+        } else if (imagem != null && !imagem.isEmpty()){
+            // 3. Converte imagem em URL se existir
+            imgURL = fileStorageService.salvarArquivo(imagem);
         }
-
-        // 3. Converte imagem em URL
-        String imgURL = fileStorageService.salvarArquivo(imagem);
 
         Item item = dto.toItem();
 
