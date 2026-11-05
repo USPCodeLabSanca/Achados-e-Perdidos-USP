@@ -7,6 +7,7 @@ import com.usp.USPerdi.model.Item;
 import com.usp.USPerdi.model.StatusItem;
 import com.usp.USPerdi.model.Usuario;
 import com.usp.USPerdi.repository.ItemRepository;
+import jakarta.transaction.Status;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +48,10 @@ public class ItemService {
 
     @Transactional
     public ItemResponseDTO cadastrarNovoItem(String emailUsp, ItemCadastrarNovoDTO dto, MultipartFile imagem, StatusItem status){
+
+        if(status == StatusItem.recuperado) {
+            throw new IllegalArgumentException("Itens já recuperados não podem ser cadastrados");
+        }
 
         // 1. Encontra usuario no BD
         Usuario usr = usuarioService.buscarPorEmailUSP(emailUsp); // Exception ja lancada no service

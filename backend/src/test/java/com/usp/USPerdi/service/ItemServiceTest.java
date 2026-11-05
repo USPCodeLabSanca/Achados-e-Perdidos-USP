@@ -68,7 +68,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void deveCadastrarNovoItem() {
+    void deveCadastrarNovoItem_Perdido() {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
@@ -106,6 +106,55 @@ class ItemServiceTest {
         Assertions.assertEquals(dto.descricao(), salvo.getDescricao());
         Assertions.assertEquals(dto.tipo(), salvo.getTipo());
         Assertions.assertEquals(dto.dataOcorrencia(), salvo.getDataOcorrencia());
+    }
+
+    @Test
+    void deveCadastrarNovoItem_Achado() {
+        String emailUsp = "email@usp.br";
+        Usuario usuario = new Usuario();
+        usuario.setEmailUsp(emailUsp);
+        MultipartFile mockFile = mock(MultipartFile.class);
+
+        ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
+                "Carrinho Hot wheels",
+                "Redondo",
+                "Perderam um carrinho no redondo",
+                "Brinquedo",
+                LocalDate.now()
+        );
+
+        when(mockFile.isEmpty())
+                .thenReturn(false);
+
+        when(usuarioService.buscarPorEmailUSP(emailUsp))
+                .thenReturn(usuario);
+
+        when(fileStorageService.salvarArquivo(mockFile))
+                .thenReturn("uploads/arquivo");
+
+        itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado);
+
+        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(captor.capture());
+
+        Item salvo = captor.getValue();
+
+        Assertions.assertEquals(usuario, salvo.getUsuario());
+        Assertions.assertEquals(StatusItem.encontrado, salvo.getStatus());
+        Assertions.assertEquals("uploads/arquivo", salvo.getFoto());
+        Assertions.assertEquals(dto.nome(), salvo.getNome());
+        Assertions.assertEquals(dto.local(), salvo.getLocal());
+        Assertions.assertEquals(dto.descricao(), salvo.getDescricao());
+        Assertions.assertEquals(dto.tipo(), salvo.getTipo());
+        Assertions.assertEquals(dto.dataOcorrencia(), salvo.getDataOcorrencia());
+    }
+
+    @Test
+    void deveFalharCadastrarNovoItem_ItemRecuperado() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> itemService.cadastrarNovoItem("email@usp.br", mock(ItemCadastrarNovoDTO.class), mock(MultipartFile.class), StatusItem.recuperado));
+
+        verify(itemRepository, never()).save(any());
     }
 
     @Test
