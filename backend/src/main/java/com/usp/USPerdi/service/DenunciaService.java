@@ -65,7 +65,6 @@ public class DenunciaService {
             denuncia.setItemEnvolvido(itemEnvolvido);
         }
 
-
         denunciaRepository.save(denuncia);
 
         return DenunciaResponseDTO.fromDenuncia(denuncia);
@@ -130,12 +129,9 @@ public class DenunciaService {
         }
 
         // 4. Descricao nova valida
-        if (dto.descricao().isBlank()){
-            throw new IllegalArgumentException("Nova descrição em branco ou não está na faixa de caracteres aceita");
+        if (dto.descricao() != null && !dto.descricao().isBlank()){
+            denuncia.setDescricao(dto.descricao());
         }
-
-        denuncia.setDescricao(dto.descricao());
-        denunciaRepository.save(denuncia);
 
         return DenunciaResponseDTO.fromDenuncia(denuncia);
     }
