@@ -90,10 +90,10 @@ public class ItemController {
 
     // Update
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ItemResponseDTO> atualizarItem(
             @PathVariable Long id,
-            @RequestBody ItemExistenteAtualizarDTO dto,
+            @RequestBody @Valid ItemExistenteAtualizarDTO dto,
             @AuthenticationPrincipal Jwt jwt
     ) {
         String email = jwt.getClaimAsString("email");
