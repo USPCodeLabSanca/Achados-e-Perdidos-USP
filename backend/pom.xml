@@ -27,9 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>27</java.version>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<java.version>25</java.version>
 	</properties>
 	<dependencies>
 		<dependency> <!-- Dependência para fazer Mock para testes de unidade -->

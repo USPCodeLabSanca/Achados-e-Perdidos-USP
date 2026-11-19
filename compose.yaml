@@ -29,6 +29,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       DEFAULT_USER_PHOTO: ${DEFAULT_USER_PHOTO:-https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg}
       API_BASE_URL: ${API_BASE_URL:-http://localhost:8080}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
     depends_on:
       postgres:
         condition: service_healthy
