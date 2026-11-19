@@ -7,7 +7,6 @@ import com.usp.USPerdi.model.Item;
 import com.usp.USPerdi.model.StatusItem;
 import com.usp.USPerdi.model.Usuario;
 import com.usp.USPerdi.repository.ItemRepository;
-import jakarta.transaction.Status;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -82,6 +81,11 @@ public class ItemService {
 
     public Page<ItemResponseDTO> buscaTodosPorNome(String nome, Pageable pageable){
         return itemRepository.findByNomeContainingIgnoreCase(nome, pageable)
+                .map(ItemResponseDTO::fromItem);
+    }
+
+    public Page<ItemResponseDTO> listarItensRecentes(Pageable pageable) {
+        return itemRepository.findByStatusNotOrderByDataRegistroDesc(StatusItem.recuperado, pageable)
                 .map(ItemResponseDTO::fromItem);
     }
 
