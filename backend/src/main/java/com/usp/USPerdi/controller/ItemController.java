@@ -32,7 +32,7 @@ public class ItemController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ItemResponseDTO> criarItem(
             @Valid @RequestPart("dados") ItemCadastrarNovoDTO itemDTO,
-            @RequestPart("foto") MultipartFile foto,
+            @RequestPart(value = "foto", required = false) MultipartFile foto,
             @RequestParam("status") StatusItem status,
             @AuthenticationPrincipal Jwt jwt
     ) {

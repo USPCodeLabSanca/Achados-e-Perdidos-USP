@@ -113,6 +113,7 @@ class ItemServiceTest {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = mock(MultipartFile.class);
 
         ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
@@ -138,7 +139,7 @@ class ItemServiceTest {
 
         Assertions.assertEquals(usuario, salvo.getUsuario());
         Assertions.assertEquals(StatusItem.perdido, salvo.getStatus());
-        Assertions.assertEquals(null, salvo.getFoto());
+        Assertions.assertEquals(usuario.getFoto(), salvo.getFoto());
         Assertions.assertEquals(dto.nome(), salvo.getNome());
         Assertions.assertEquals(dto.local(), salvo.getLocal());
         Assertions.assertEquals(dto.descricao(), salvo.getDescricao());
@@ -151,6 +152,7 @@ class ItemServiceTest {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = null;
 
         ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
@@ -173,7 +175,7 @@ class ItemServiceTest {
 
         Assertions.assertEquals(usuario, salvo.getUsuario());
         Assertions.assertEquals(StatusItem.perdido, salvo.getStatus());
-        Assertions.assertEquals(null, salvo.getFoto());
+        Assertions.assertEquals(usuario.getFoto(), salvo.getFoto());
         Assertions.assertEquals(dto.nome(), salvo.getNome());
         Assertions.assertEquals(dto.local(), salvo.getLocal());
         Assertions.assertEquals(dto.descricao(), salvo.getDescricao());
@@ -223,10 +225,11 @@ class ItemServiceTest {
     }
 
     @Test
-    void deveFalharCadastrarNovoItem_Achado_SemFoto_Vazio() {
+    void deveUsarFotoGoogle_Achado_SemFoto_Vazio() {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = mock(MultipartFile.class);
 
         ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
@@ -240,17 +243,21 @@ class ItemServiceTest {
         when(mockFile.isEmpty())
                 .thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado));
+        when(usuarioService.buscarPorEmailUSP(emailUsp)).thenReturn(usuario);
 
-        verify(itemRepository, never()).save(any());
+        itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado);
+
+        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(captor.capture());
+        Assertions.assertEquals(usuario.getFoto(), captor.getValue().getFoto());
     }
 
     @Test
-    void deveFalharCadastrarNovoItem_Achado_SemFoto_Nulo() {
+    void deveUsarFotoGoogle_Achado_SemFoto_Nulo() {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = null;
 
         ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
@@ -261,10 +268,13 @@ class ItemServiceTest {
                 LocalDate.now()
         );
 
-        assertThrows(IllegalArgumentException.class,
-                () -> itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado));
+        when(usuarioService.buscarPorEmailUSP(emailUsp)).thenReturn(usuario);
 
-        verify(itemRepository, never()).save(any());
+        itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado);
+
+        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(captor.capture());
+        Assertions.assertEquals(usuario.getFoto(), captor.getValue().getFoto());
     }
 
     @Test
@@ -288,10 +298,11 @@ class ItemServiceTest {
     }
 
     @Test
-    void deveFalharCadastrarNovoItem_SemImagem_ConteudoVazio() {
+    void deveUsarFotoGoogle_QuandoImagemVazia() {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = mock(MultipartFile.class);
 
         when(mockFile.isEmpty())
@@ -300,22 +311,31 @@ class ItemServiceTest {
         when(usuarioService.buscarPorEmailUSP(emailUsp))
                 .thenReturn(usuario);
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mockFile, StatusItem.encontrado));
+        ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO("Item", null, null, "Acessório", LocalDate.now());
+        itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado);
+
+        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(captor.capture());
+        Assertions.assertEquals(usuario.getFoto(), captor.getValue().getFoto());
     }
 
     @Test
-    void deveFalharCadastrarNovoItem_SemImagem_Nulo() {
+    void deveUsarFotoGoogle_QuandoImagemNula() {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = null;
 
         when(usuarioService.buscarPorEmailUSP(emailUsp))
                 .thenReturn(usuario);
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mockFile, StatusItem.encontrado));
+        ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO("Item", null, null, "Acessório", LocalDate.now());
+        itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado);
+
+        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(captor.capture());
+        Assertions.assertEquals(usuario.getFoto(), captor.getValue().getFoto());
     }
 
     @Test
