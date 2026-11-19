@@ -1,5 +1,7 @@
 package com.usp.USPerdi.service;
 
+import com.usp.USPerdi.exception.ArmazenamentoArquivoException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+
 
 @Service
 public class FileStorageService {
@@ -31,7 +34,7 @@ public class FileStorageService {
             // Cria a pasta automaticamente quando o Spring iniciar
             Files.createDirectories(this.pastaUploads);
         } catch (IOException e) {
-            throw new RuntimeException("Não foi possível criar a pasta para upload de imagens.", e);
+            throw new ArmazenamentoArquivoException("Não foi possível criar a pasta para upload de imagens.", e);
         }
     }
 
@@ -54,7 +57,7 @@ public class FileStorageService {
             return apiBaseUrl + "/uploads/" + nomeNovo;
 
         } catch (IOException e) {
-            throw new RuntimeException("Falha ao armazenar a imagem.", e);
+            throw new ArmazenamentoArquivoException("Falha ao armazenar a imagem.", e);
         }
     }
 

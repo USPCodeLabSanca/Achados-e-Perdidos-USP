@@ -4,6 +4,10 @@ import com.usp.USPerdi.dto.DenunciaAtualizarDTO;
 import com.usp.USPerdi.dto.DenunciaCriarNovaDTO;
 import com.usp.USPerdi.dto.DenunciaJulgarDTO;
 import com.usp.USPerdi.dto.DenunciaResponseDTO;
+import com.usp.USPerdi.exception.AcessoNegadoException;
+import com.usp.USPerdi.exception.ConflitoDeRecursoException;
+import com.usp.USPerdi.exception.RecursoNaoEncontradoException;
+import com.usp.USPerdi.exception.RegraDeNegocioException;
 import com.usp.USPerdi.model.Denuncia;
 import com.usp.USPerdi.model.Item;
 import com.usp.USPerdi.model.StatusDenuncia;
@@ -15,6 +19,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 
 import java.time.Instant;
 import java.util.List;
@@ -43,13 +48,13 @@ public class DenunciaService {
 
         // 1. Verificação de auto-denúncia
         if (usrDenunciado.getId().equals(usrDenunciante.getId())){
-            throw new IllegalArgumentException("Não é permitido auto-denúncia");
+            throw new RegraDeNegocioException("Não é permitido auto-denúncia");
         }
 
         // 2. Trava contra Spam: verifica se Usuário já tem denúncia ativa contra essa pessoa
-            if (denunciaRepository.existsByUsrDenuncianteAndUsrDenunciadoAndStatus(usrDenunciante, usrDenunciado, StatusDenuncia.pendente)) {
-                throw new IllegalArgumentException("Você já possui uma denúncia em análise contra este usuário.");
-            }
+        if (denunciaRepository.existsByUsrDenuncianteAndUsrDenunciadoAndStatus(usrDenunciante, usrDenunciado, StatusDenuncia.pendente)) {
+            throw new ConflitoDeRecursoException("Você já possui uma denúncia em análise contra este usuário.");
+        }
 
         Denuncia denuncia = new Denuncia();
         denuncia.setUsrDenunciante(usrDenunciante);
@@ -115,17 +120,17 @@ public class DenunciaService {
 
         // 1. Encontrar denúncia no BD
         Denuncia denuncia = denunciaRepository.findById(idDenuncia)
-                .orElseThrow(() -> new IllegalArgumentException("Denúncia inexistente de ID: " + idDenuncia));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Denúncia inexistente de ID: " + idDenuncia));
 
         // 2. Verifica se denuncia ja nao foi resolvida
         if (!denuncia.getStatus().equals(StatusDenuncia.pendente)){
-            throw new IllegalArgumentException("Denúncia já avaliada de ID: " + idDenuncia);
+            throw new RegraDeNegocioException("Denúncia já avaliada de ID: " + idDenuncia);
         }
 
         // 3. Trava de segurança
         Usuario usrLogado = usuarioService.buscarPorEmailUSP(emailUspLogado);
         if (!denuncia.getUsrDenunciante().getId().equals(usrLogado.getId())){
-            throw new SecurityException("Você não tem permissão para editar essa denúncia.");
+            throw new AcessoNegadoException("Você não tem permissão para editar essa denúncia.");
         }
 
         // 4. Descricao nova valida
@@ -143,17 +148,17 @@ public class DenunciaService {
 
         // 1. Encontrar denúncia no BD
         Denuncia denuncia = denunciaRepository.findById(idDenuncia)
-                .orElseThrow(() -> new IllegalArgumentException("Denúncia inexistente de ID: " + idDenuncia));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Denúncia inexistente de ID: " + idDenuncia));
 
         // 2. Trava de segurança
         Usuario usrLogado = usuarioService.buscarPorEmailUSP(emailUspLogado);
         if (!denuncia.getUsrDenunciante().getId().equals(usrLogado.getId())){
-            throw new SecurityException("Você não tem permissão para deletar essa denúncia.");
+            throw new AcessoNegadoException("Você não tem permissão para deletar essa denúncia.");
         }
 
         // 3. Trava de Status: Não apagar histórico de denúncias já julgadas
         if (!denuncia.getStatus().equals(StatusDenuncia.pendente)) {
-            throw new IllegalArgumentException("Não é possível deletar uma denúncia que já foi avaliada pelos administradores.");
+            throw new RegraDeNegocioException("Não é possível deletar uma denúncia que já foi avaliada pelos administradores.");
         }
 
         denunciaRepository.delete(denuncia);
@@ -166,11 +171,11 @@ public class DenunciaService {
 
         // 1. Encontrar denúncia no BD
         Denuncia denuncia = denunciaRepository.findById(idDenuncia)
-                .orElseThrow(() -> new IllegalArgumentException("Denúncia inexistente de ID: " + idDenuncia));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Denúncia inexistente de ID: " + idDenuncia));
 
         // 2. Evita transações desnecessárias no banco
         if (denuncia.getStatus().equals(dto.novoStatus())) {
-            throw new IllegalArgumentException("A denúncia já se encontra no status: " + dto.novoStatus());
+            throw new RegraDeNegocioException("A denúncia já se encontra no status: " + dto.novoStatus());
         }
 
         // 3. Atualiza o status
