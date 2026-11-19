@@ -15,6 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import com.usp.USPerdi.exception.ConflitoDeRecursoException;
+import com.usp.USPerdi.exception.RecursoNaoEncontradoException;
+
 @Service
 @Validated
 public class UsuarioService {
@@ -35,7 +38,7 @@ public class UsuarioService {
 
         // 1. Verificar no BD se ja ha alguem cadastrado com esse email usp
         if (usuarioRepository.findByEmailUsp(dto.emailUsp()).isPresent()){
-            throw new IllegalArgumentException("Este e-mail USP já possui cadastro no sistema.");
+            throw new ConflitoDeRecursoException("Este e-mail USP já possui cadastro no sistema.");
         }
 
         // 2. Instanciar um usuário com as informações do DTO
@@ -60,12 +63,12 @@ public class UsuarioService {
     // Retornamos USUARIO porque eh utilizado no ItemService
     public Usuario buscarPorEmailUSP(String emailUsp){
         return usuarioRepository.findByEmailUsp(emailUsp)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com o e-mail: " + emailUsp));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o e-mail: " + emailUsp));
     }
 
     public Usuario buscarPorId(Long id){
         return usuarioRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o ID: " + id));
     }
 
 
