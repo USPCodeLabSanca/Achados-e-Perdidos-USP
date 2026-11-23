@@ -2,6 +2,8 @@ package com.usp.USPerdi.service;
 
 import com.usp.USPerdi.dto.ItemCadastrarNovoDTO;
 import com.usp.USPerdi.dto.ItemResponseDTO;
+import com.usp.USPerdi.exception.RecursoNaoEncontradoException;
+import com.usp.USPerdi.exception.RegraDeNegocioException;
 import com.usp.USPerdi.model.*;
 import com.usp.USPerdi.repository.ItemRepository;
 import jakarta.validation.constraints.AssertTrue;
@@ -63,7 +65,7 @@ class ItemServiceTest {
         when(itemRepository.findById(10L))
                 .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(RecursoNaoEncontradoException.class,
                 () -> itemService.buscarPorId(10L));
     }
 
@@ -240,7 +242,7 @@ class ItemServiceTest {
         when(mockFile.isEmpty())
                 .thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RegraDeNegocioException.class,
                 () -> itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado));
 
         verify(itemRepository, never()).save(any());
@@ -261,7 +263,7 @@ class ItemServiceTest {
                 LocalDate.now()
         );
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RegraDeNegocioException.class,
                 () -> itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado));
 
         verify(itemRepository, never()).save(any());
@@ -269,7 +271,7 @@ class ItemServiceTest {
 
     @Test
     void deveFalharCadastrarNovoItem_ItemRecuperado() {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(RegraDeNegocioException.class,
                 () -> itemService.cadastrarNovoItem("email@usp.br", mock(ItemCadastrarNovoDTO.class), mock(MultipartFile.class), StatusItem.recuperado));
 
         verify(itemRepository, never()).save(any());
@@ -280,9 +282,9 @@ class ItemServiceTest {
         String emailUsp = "email@usp.br";
 
         when(usuarioService.buscarPorEmailUSP(emailUsp))
-                .thenThrow(IllegalArgumentException.class);
+                .thenThrow(RecursoNaoEncontradoException.class);
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(RecursoNaoEncontradoException.class,
                 () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mock(MultipartFile.class), StatusItem.perdido));
 
     }
@@ -300,7 +302,7 @@ class ItemServiceTest {
         when(usuarioService.buscarPorEmailUSP(emailUsp))
                 .thenReturn(usuario);
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(RegraDeNegocioException.class,
                 () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mockFile, StatusItem.encontrado));
     }
 
@@ -314,7 +316,7 @@ class ItemServiceTest {
         when(usuarioService.buscarPorEmailUSP(emailUsp))
                 .thenReturn(usuario);
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(RegraDeNegocioException.class,
                 () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mockFile, StatusItem.encontrado));
     }
 
@@ -444,11 +446,11 @@ class ItemServiceTest {
 
         // Mock behavior
         when(usuarioService.buscarPorEmailUSP(email))
-                .thenThrow(new IllegalArgumentException());
+                .thenThrow(new RecursoNaoEncontradoException("Usuário não encontrado"));
 
         // Açao
         // Assert
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RecursoNaoEncontradoException.class,
                 () -> itemService.buscaTodosPorUsuario(email, pageable));
 
         verify(usuarioService).buscarPorEmailUSP(email);
