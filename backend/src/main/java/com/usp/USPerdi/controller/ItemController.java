@@ -48,6 +48,12 @@ public class ItemController {
 
     // READ
 
+    // Lista os itens ainda ativos sem exigir um filtro, mantendo paginação.
+    @GetMapping("/recentes")
+    public ResponseEntity<Page<ItemResponseDTO>> listarItensRecentes(Pageable pageable) {
+        return ResponseEntity.ok(itemService.listarItensRecentes(pageable));
+    }
+
     @GetMapping("/busca/nome")
     public ResponseEntity<Page<ItemResponseDTO>> buscaPorNome(
             @RequestParam("nome") String nome,

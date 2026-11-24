@@ -14,7 +14,7 @@ SET row_security = off;
 
 -- ENUMS
 CREATE TYPE public.campus_enum AS ENUM (
-    'sp-butanta', 'sp-centro', 'sp-quadrilatero', 'sp-leste',
+    'sp_butanta', 'sp_centro', 'sp_quadrilatero', 'sp_leste',
     'piracicaba', 'sao-carlos', 'ribeirao-preto', 'lorena',
     'bauru', 'pirassununga', 'santos', 'outro'
 );

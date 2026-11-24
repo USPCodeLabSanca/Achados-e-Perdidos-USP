@@ -1,5 +1,11 @@
 package com.usp.USPerdi.service;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.usp.USPerdi.dto.ItemCadastrarNovoDTO;
 import com.usp.USPerdi.dto.ItemExistenteAtualizarDTO;
 import com.usp.USPerdi.dto.ItemResponseDTO;
@@ -10,12 +16,8 @@ import com.usp.USPerdi.model.Item;
 import com.usp.USPerdi.model.StatusItem;
 import com.usp.USPerdi.model.Usuario;
 import com.usp.USPerdi.repository.ItemRepository;
-import jakarta.transaction.Status;
+
 import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @Service
@@ -24,6 +26,9 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final UsuarioService usuarioService;
     private final FileStorageService fileStorageService;
+
+    @Value("${DEFAULT_USER_PHOTO:https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg}")
+    private String defaultUserPhoto;
 
     // Constructor
 
@@ -60,17 +65,14 @@ public class ItemService {
         // 1. Encontra usuario no BD
         Usuario usr = usuarioService.buscarPorEmailUSP(emailUsp); // Exception ja lancada no service
 
-        String imgURL = null;
-        // 2. Valida imagem
-        // Item encontrado precisa de foto
-        // Item não encontrado pode não ter
-        if ((imagem == null || imagem.isEmpty()) && status == StatusItem.encontrado){
-            throw new RegraDeNegocioException("A foto do item é obrigatória para o cadastro.");
-        } else if (imagem != null && !imagem.isEmpty()){
-            // 3. Converte imagem em URL se existir
+        String imgURL;
+        if (imagem != null && !imagem.isEmpty()) {
             imgURL = fileStorageService.salvarArquivo(imagem);
+        } else if (usr.getFoto() != null && !usr.getFoto().isBlank()) {
+            imgURL = usr.getFoto();
+        } else {
+            imgURL = defaultUserPhoto;
         }
-
         Item item = dto.toItem();
 
         item.setStatus(status);
@@ -86,6 +88,11 @@ public class ItemService {
 
     public Page<ItemResponseDTO> buscaTodosPorNome(String nome, Pageable pageable){
         return itemRepository.findByNomeContainingIgnoreCase(nome, pageable)
+                .map(ItemResponseDTO::fromItem);
+    }
+
+    public Page<ItemResponseDTO> listarItensRecentes(Pageable pageable) {
+        return itemRepository.findByStatusNotOrderByDataRegistroDesc(StatusItem.recuperado, pageable)
                 .map(ItemResponseDTO::fromItem);
     }
 

@@ -1,38 +1,41 @@
 package com.usp.USPerdi.service;
 
-import com.usp.USPerdi.dto.ItemCadastrarNovoDTO;
-import com.usp.USPerdi.dto.ItemResponseDTO;
-import com.usp.USPerdi.exception.RecursoNaoEncontradoException;
-import com.usp.USPerdi.exception.RegraDeNegocioException;
-import com.usp.USPerdi.model.*;
-import com.usp.USPerdi.repository.ItemRepository;
-import jakarta.validation.constraints.AssertTrue;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalUnit;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.usp.USPerdi.dto.ItemCadastrarNovoDTO;
+import com.usp.USPerdi.dto.ItemResponseDTO;
+import com.usp.USPerdi.exception.RecursoNaoEncontradoException;
+import com.usp.USPerdi.exception.RegraDeNegocioException;
+import com.usp.USPerdi.model.Campus;
+import com.usp.USPerdi.model.Item;
+import com.usp.USPerdi.model.StatusConta;
+import com.usp.USPerdi.model.StatusItem;
+import com.usp.USPerdi.model.Usuario;
+import com.usp.USPerdi.repository.ItemRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceTest {
@@ -115,6 +118,7 @@ class ItemServiceTest {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = mock(MultipartFile.class);
 
         ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
@@ -140,7 +144,7 @@ class ItemServiceTest {
 
         Assertions.assertEquals(usuario, salvo.getUsuario());
         Assertions.assertEquals(StatusItem.perdido, salvo.getStatus());
-        Assertions.assertEquals(null, salvo.getFoto());
+        Assertions.assertEquals(usuario.getFoto(), salvo.getFoto());
         Assertions.assertEquals(dto.nome(), salvo.getNome());
         Assertions.assertEquals(dto.local(), salvo.getLocal());
         Assertions.assertEquals(dto.descricao(), salvo.getDescricao());
@@ -153,6 +157,7 @@ class ItemServiceTest {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = null;
 
         ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
@@ -175,7 +180,7 @@ class ItemServiceTest {
 
         Assertions.assertEquals(usuario, salvo.getUsuario());
         Assertions.assertEquals(StatusItem.perdido, salvo.getStatus());
-        Assertions.assertEquals(null, salvo.getFoto());
+        Assertions.assertEquals(usuario.getFoto(), salvo.getFoto());
         Assertions.assertEquals(dto.nome(), salvo.getNome());
         Assertions.assertEquals(dto.local(), salvo.getLocal());
         Assertions.assertEquals(dto.descricao(), salvo.getDescricao());
@@ -225,10 +230,11 @@ class ItemServiceTest {
     }
 
     @Test
-    void deveFalharCadastrarNovoItem_Achado_SemFoto_Vazio() {
+    void deveUsarFotoGoogle_Achado_SemFoto_Vazio() {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = mock(MultipartFile.class);
 
         ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
@@ -242,17 +248,21 @@ class ItemServiceTest {
         when(mockFile.isEmpty())
                 .thenReturn(true);
 
-        assertThrows(RegraDeNegocioException.class,
-                () -> itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado));
+        when(usuarioService.buscarPorEmailUSP(emailUsp)).thenReturn(usuario);
 
-        verify(itemRepository, never()).save(any());
+        itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado);
+
+        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(captor.capture());
+        Assertions.assertEquals(usuario.getFoto(), captor.getValue().getFoto());
     }
 
     @Test
-    void deveFalharCadastrarNovoItem_Achado_SemFoto_Nulo() {
+    void deveUsarFotoGoogle_Achado_SemFoto_Nulo() {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = null;
 
         ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO(
@@ -263,10 +273,13 @@ class ItemServiceTest {
                 LocalDate.now()
         );
 
-        assertThrows(RegraDeNegocioException.class,
-                () -> itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado));
+        when(usuarioService.buscarPorEmailUSP(emailUsp)).thenReturn(usuario);
 
-        verify(itemRepository, never()).save(any());
+        itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado);
+
+        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(captor.capture());
+        Assertions.assertEquals(usuario.getFoto(), captor.getValue().getFoto());
     }
 
     @Test
@@ -290,10 +303,11 @@ class ItemServiceTest {
     }
 
     @Test
-    void deveFalharCadastrarNovoItem_SemImagem_ConteudoVazio() {
+    void deveUsarFotoGoogle_QuandoImagemVazia() {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = mock(MultipartFile.class);
 
         when(mockFile.isEmpty())
@@ -302,22 +316,31 @@ class ItemServiceTest {
         when(usuarioService.buscarPorEmailUSP(emailUsp))
                 .thenReturn(usuario);
 
-        Assertions.assertThrows(RegraDeNegocioException.class,
-                () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mockFile, StatusItem.encontrado));
+        ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO("Item", null, null, "Acessório", LocalDate.now());
+        itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado);
+
+        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(captor.capture());
+        Assertions.assertEquals(usuario.getFoto(), captor.getValue().getFoto());
     }
 
     @Test
-    void deveFalharCadastrarNovoItem_SemImagem_Nulo() {
+    void deveUsarFotoGoogle_QuandoImagemNula() {
         String emailUsp = "email@usp.br";
         Usuario usuario = new Usuario();
         usuario.setEmailUsp(emailUsp);
+        usuario.setFoto("https://google.test/foto-perfil.png");
         MultipartFile mockFile = null;
 
         when(usuarioService.buscarPorEmailUSP(emailUsp))
                 .thenReturn(usuario);
 
-        Assertions.assertThrows(RegraDeNegocioException.class,
-                () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mockFile, StatusItem.encontrado));
+        ItemCadastrarNovoDTO dto = new ItemCadastrarNovoDTO("Item", null, null, "Acessório", LocalDate.now());
+        itemService.cadastrarNovoItem(emailUsp, dto, mockFile, StatusItem.encontrado);
+
+        ArgumentCaptor<Item> captor = ArgumentCaptor.forClass(Item.class);
+        verify(itemRepository).save(captor.capture());
+        Assertions.assertEquals(usuario.getFoto(), captor.getValue().getFoto());
     }
 
     @Test
