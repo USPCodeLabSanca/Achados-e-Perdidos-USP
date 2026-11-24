@@ -1,36 +1,41 @@
 package com.usp.USPerdi.service;
 
-import com.usp.USPerdi.dto.ItemCadastrarNovoDTO;
-import com.usp.USPerdi.dto.ItemResponseDTO;
-import com.usp.USPerdi.model.*;
-import com.usp.USPerdi.repository.ItemRepository;
-import jakarta.validation.constraints.AssertTrue;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalUnit;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.usp.USPerdi.dto.ItemCadastrarNovoDTO;
+import com.usp.USPerdi.dto.ItemResponseDTO;
+import com.usp.USPerdi.exception.RecursoNaoEncontradoException;
+import com.usp.USPerdi.exception.RegraDeNegocioException;
+import com.usp.USPerdi.model.Campus;
+import com.usp.USPerdi.model.Item;
+import com.usp.USPerdi.model.StatusConta;
+import com.usp.USPerdi.model.StatusItem;
+import com.usp.USPerdi.model.Usuario;
+import com.usp.USPerdi.repository.ItemRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceTest {
@@ -63,7 +68,7 @@ class ItemServiceTest {
         when(itemRepository.findById(10L))
                 .thenReturn(Optional.empty());
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(RecursoNaoEncontradoException.class,
                 () -> itemService.buscarPorId(10L));
     }
 
@@ -279,7 +284,7 @@ class ItemServiceTest {
 
     @Test
     void deveFalharCadastrarNovoItem_ItemRecuperado() {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(RegraDeNegocioException.class,
                 () -> itemService.cadastrarNovoItem("email@usp.br", mock(ItemCadastrarNovoDTO.class), mock(MultipartFile.class), StatusItem.recuperado));
 
         verify(itemRepository, never()).save(any());
@@ -290,9 +295,9 @@ class ItemServiceTest {
         String emailUsp = "email@usp.br";
 
         when(usuarioService.buscarPorEmailUSP(emailUsp))
-                .thenThrow(IllegalArgumentException.class);
+                .thenThrow(RecursoNaoEncontradoException.class);
 
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(RecursoNaoEncontradoException.class,
                 () -> itemService.cadastrarNovoItem(emailUsp, mock(ItemCadastrarNovoDTO.class), mock(MultipartFile.class), StatusItem.perdido));
 
     }
@@ -464,11 +469,11 @@ class ItemServiceTest {
 
         // Mock behavior
         when(usuarioService.buscarPorEmailUSP(email))
-                .thenThrow(new IllegalArgumentException());
+                .thenThrow(new RecursoNaoEncontradoException("Usuário não encontrado"));
 
         // Açao
         // Assert
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RecursoNaoEncontradoException.class,
                 () -> itemService.buscaTodosPorUsuario(email, pageable));
 
         verify(usuarioService).buscarPorEmailUSP(email);

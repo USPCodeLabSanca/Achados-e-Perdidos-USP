@@ -7,6 +7,9 @@ import com.usp.USPerdi.model.Item;
 import com.usp.USPerdi.model.StatusDenuncia;
 import com.usp.USPerdi.model.Usuario;
 import com.usp.USPerdi.repository.DenunciaRepository;
+import com.usp.USPerdi.exception.AcessoNegadoException;
+import com.usp.USPerdi.exception.ConflitoDeRecursoException;
+import com.usp.USPerdi.exception.RegraDeNegocioException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,8 +70,6 @@ public class DenunciaServiceTest {
                 usrDenunciado.getId(),
                 item.getIdItem()
         );
-
-
     }
 
     @Test
@@ -113,7 +114,7 @@ public class DenunciaServiceTest {
                 mockNovaDenuncia.idItemEnvolvido()
         );
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RegraDeNegocioException.class,
                 () -> denunciaService.criarNovaDenuncia(mockNovaDenuncia, usrDenunciante.getEmailUsp()));
 
         verify(denunciaRepository, never()).save(any());
@@ -128,7 +129,7 @@ public class DenunciaServiceTest {
         when(denunciaRepository.existsByUsrDenuncianteAndUsrDenunciadoAndStatus(usrDenunciante, usrDenunciado, StatusDenuncia.pendente))
                 .thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ConflitoDeRecursoException.class,
                 () -> denunciaService.criarNovaDenuncia(mockNovaDenuncia, usrDenunciante.getEmailUsp()));
 
         verify(denunciaRepository, never()).save(any());
@@ -136,7 +137,6 @@ public class DenunciaServiceTest {
 
     @Test
     void deveAtualizarDenuncia() {
-
         mockDenuncia.setStatus(StatusDenuncia.pendente);
 
         when(denunciaRepository.findById(mockDenuncia.getIdDenuncia()))
@@ -149,13 +149,10 @@ public class DenunciaServiceTest {
         denunciaService.atualizarDenunciaExistente(mockDenuncia.getIdDenuncia(), usrDenunciante.getEmailUsp(), dto);
 
         assertEquals("nova descrição", mockDenuncia.getDescricao());
-
-
     }
 
     @Test
     void deveAtualizarDenuncia_SemMudar_Blank() {
-
         mockDenuncia.setStatus(StatusDenuncia.pendente);
 
         when(denunciaRepository.findById(mockDenuncia.getIdDenuncia()))
@@ -168,13 +165,10 @@ public class DenunciaServiceTest {
         denunciaService.atualizarDenunciaExistente(mockDenuncia.getIdDenuncia(), usrDenunciante.getEmailUsp(), dto);
 
         assertEquals("Fizeram coisa feia", mockDenuncia.getDescricao());
-
-
     }
 
     @Test
     void deveAtualizarDenuncia_SemMudar_Nulo() {
-
         mockDenuncia.setStatus(StatusDenuncia.pendente);
 
         when(denunciaRepository.findById(mockDenuncia.getIdDenuncia()))
@@ -187,13 +181,10 @@ public class DenunciaServiceTest {
         denunciaService.atualizarDenunciaExistente(mockDenuncia.getIdDenuncia(), usrDenunciante.getEmailUsp(), dto);
 
         assertEquals("Fizeram coisa feia", mockDenuncia.getDescricao());
-
-
     }
 
     @Test
     void deveFalharAtualizarDenuncia_DenunciaResolvida_Aceita() {
-
         mockDenuncia.setStatus(StatusDenuncia.aceita);
 
         when(denunciaRepository.findById(mockDenuncia.getIdDenuncia()))
@@ -201,14 +192,12 @@ public class DenunciaServiceTest {
 
         DenunciaAtualizarDTO dto = new DenunciaAtualizarDTO("nova descrição");
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RegraDeNegocioException.class,
                 () -> denunciaService.atualizarDenunciaExistente(mockDenuncia.getIdDenuncia(), usrDenunciante.getEmailUsp(), dto));
-
     }
 
     @Test
     void deveFalharAtualizarDenuncia_DenunciaResolvida_Rejeitada() {
-
         mockDenuncia.setStatus(StatusDenuncia.rejeitada);
 
         when(denunciaRepository.findById(mockDenuncia.getIdDenuncia()))
@@ -216,14 +205,12 @@ public class DenunciaServiceTest {
 
         DenunciaAtualizarDTO dto = new DenunciaAtualizarDTO("nova descrição");
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RegraDeNegocioException.class,
                 () -> denunciaService.atualizarDenunciaExistente(mockDenuncia.getIdDenuncia(), usrDenunciante.getEmailUsp(), dto));
-
     }
 
     @Test
     void deveFalharAtualizarDenuncia_UsuarioNaoPermitido() {
-
         mockDenuncia.setStatus(StatusDenuncia.pendente);
 
         when(denunciaRepository.findById(mockDenuncia.getIdDenuncia()))
@@ -233,9 +220,8 @@ public class DenunciaServiceTest {
 
         DenunciaAtualizarDTO dto = new DenunciaAtualizarDTO("nova descrição");
 
-        assertThrows(SecurityException.class,
+        assertThrows(AcessoNegadoException.class,
                 () -> denunciaService.atualizarDenunciaExistente(mockDenuncia.getIdDenuncia(), usrDenunciado.getEmailUsp(), dto));
-
     }
 
     @Test
@@ -259,7 +245,7 @@ public class DenunciaServiceTest {
                 .thenReturn(usrDenunciante);
         mockDenuncia.setStatus(StatusDenuncia.aceita);
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RegraDeNegocioException.class,
                 () -> denunciaService.deletarDenuncia(usrDenunciante.getEmailUsp(), mockDenuncia.getIdDenuncia()));
 
         verify(denunciaRepository, never()).delete(mockDenuncia);
@@ -273,7 +259,7 @@ public class DenunciaServiceTest {
                 .thenReturn(usrDenunciante);
         mockDenuncia.setStatus(StatusDenuncia.rejeitada);
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RegraDeNegocioException.class,
                 () -> denunciaService.deletarDenuncia(usrDenunciante.getEmailUsp(), mockDenuncia.getIdDenuncia()));
 
         verify(denunciaRepository, never()).delete(mockDenuncia);
@@ -287,11 +273,9 @@ public class DenunciaServiceTest {
                 .thenReturn(usrDenunciado);
         mockDenuncia.setStatus(StatusDenuncia.rejeitada);
 
-        assertThrows(SecurityException.class,
+        assertThrows(AcessoNegadoException.class,
                 () -> denunciaService.deletarDenuncia(usrDenunciado.getEmailUsp(), mockDenuncia.getIdDenuncia()));
 
         verify(denunciaRepository, never()).delete(mockDenuncia);
     }
-
-
 }

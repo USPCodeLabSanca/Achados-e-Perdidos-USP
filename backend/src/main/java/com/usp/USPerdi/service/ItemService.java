@@ -1,18 +1,23 @@
 package com.usp.USPerdi.service;
 
-import com.usp.USPerdi.dto.ItemCadastrarNovoDTO;
-import com.usp.USPerdi.dto.ItemExistenteAtualizarDTO;
-import com.usp.USPerdi.dto.ItemResponseDTO;
-import com.usp.USPerdi.model.Item;
-import com.usp.USPerdi.model.StatusItem;
-import com.usp.USPerdi.model.Usuario;
-import com.usp.USPerdi.repository.ItemRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.usp.USPerdi.dto.ItemCadastrarNovoDTO;
+import com.usp.USPerdi.dto.ItemExistenteAtualizarDTO;
+import com.usp.USPerdi.dto.ItemResponseDTO;
+import com.usp.USPerdi.exception.AcessoNegadoException;
+import com.usp.USPerdi.exception.RecursoNaoEncontradoException;
+import com.usp.USPerdi.exception.RegraDeNegocioException;
+import com.usp.USPerdi.model.Item;
+import com.usp.USPerdi.model.StatusItem;
+import com.usp.USPerdi.model.Usuario;
+import com.usp.USPerdi.repository.ItemRepository;
+
+import jakarta.transaction.Transactional;
 
 
 @Service
@@ -42,7 +47,8 @@ public class ItemService {
 
     public Item buscarPorId(Long id){
         return itemRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Item não encontrado com o ID: " + id));}
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item não encontrado com o ID: " + id));
+    }
 
 
     // ####################
@@ -53,7 +59,7 @@ public class ItemService {
     public ItemResponseDTO cadastrarNovoItem(String emailUsp, ItemCadastrarNovoDTO dto, MultipartFile imagem, StatusItem status){
 
         if(status == StatusItem.recuperado) {
-            throw new IllegalArgumentException("Itens já recuperados não podem ser cadastrados");
+            throw new RegraDeNegocioException("Itens já recuperados não podem ser cadastrados");
         }
 
         // 1. Encontra usuario no BD
@@ -113,11 +119,11 @@ public class ItemService {
 
         // 1. Busca item cadastrado
         Item item = itemRepository.findById(idItem)
-                .orElseThrow(() -> new IllegalArgumentException("Item não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item não encontrado."));
 
         // 2. Apenas o dono pode editar o item
         if (!item.getUsuario().getEmailUsp().equals(emailUspLogado)) {
-            throw new SecurityException("Você não tem permissão para editar este item.");
+            throw new AcessoNegadoException("Você não tem permissão para editar este item.");
         }
 
         // 3. Atualiza apenas os campos que o frontend enviou (ignora os nulos)
@@ -157,16 +163,16 @@ public class ItemService {
 
         // 1. Busca o item no banco
         Item item = itemRepository.findById(idItem)
-                .orElseThrow(() -> new IllegalArgumentException("Item não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item não encontrado."));
 
         // Apenas o dono pode alterar a foto
         if (!item.getUsuario().getEmailUsp().equals(emailUspLogado)) {
-            throw new SecurityException("Você não tem permissão para alterar a foto deste item.");
+            throw new AcessoNegadoException("Você não tem permissão para alterar a foto deste item.");
         }
 
         // 3. Valida se a imagem realmente foi enviada e não está vazia
         if (novaImagem == null || novaImagem.isEmpty()) {
-            throw new IllegalArgumentException("O arquivo da nova foto é obrigatório.");
+            throw new RegraDeNegocioException("O arquivo da nova foto é obrigatório.");
         }
 
         // 4. Faz o upload da nova imagem
@@ -186,11 +192,11 @@ public class ItemService {
 
         // 1. Busca o item no banco
         Item item = itemRepository.findById(idItem)
-                .orElseThrow(() -> new IllegalArgumentException("Item não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item não encontrado."));
 
         // 2. Apenas o dono pode excluir o item
         if (!item.getUsuario().getEmailUsp().equals(emailUspLogado)) {
-            throw new SecurityException("Você não tem permissão para excluir este item.");
+            throw new AcessoNegadoException("Você não tem permissão para excluir este item.");
         }
 
         // 3. Exclui o item do banco de dados
