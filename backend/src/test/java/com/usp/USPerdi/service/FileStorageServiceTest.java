@@ -1,5 +1,7 @@
 package com.usp.USPerdi.service;
 
+import com.usp.USPerdi.exception.RegraDeNegocioException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,20 +56,15 @@ public class FileStorageServiceTest {
         Assertions.assertArrayEquals(texto.getBytes(StandardCharsets.UTF_8), Files.readAllBytes(tempDir.resolve(nomeNovo)));
     }
 
-    @Test
+   @Test
     void deveFalharSalvarArquivo_ExtensaoMaliciosa() throws IOException {
         // Não deveria salvar arquivos que não são de imagem!
         // pode ser uma falha de segurança
-        String texto = "haahahahah";
-        InputStream stream = new ByteArrayInputStream(texto.getBytes(StandardCharsets.UTF_8));
-
         final MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.getOriginalFilename())
                 .thenReturn("arquivoShow.exe");
-        when(mockFile.getInputStream())
-                .thenReturn(stream);
 
-        Assertions.assertThrows(RuntimeException.class,
+        Assertions.assertThrows(RegraDeNegocioException.class,
                 () -> fileStorageService.salvarArquivo(mockFile));
 
         Assertions.assertTrue(Files.list(tempDir).toList().isEmpty());
@@ -77,16 +74,11 @@ public class FileStorageServiceTest {
     void deveFalharSalvarArquivo_SemExtensao() throws IOException {
         // Não deveria salvar arquivos que não são de imagem!
         // pode ser uma falha de segurança
-        String texto = "haahahahah";
-        InputStream stream = new ByteArrayInputStream(texto.getBytes(StandardCharsets.UTF_8));
-
         final MultipartFile mockFile = mock(MultipartFile.class);
         when(mockFile.getOriginalFilename())
                 .thenReturn("arquivoShow");
-        when(mockFile.getInputStream())
-                .thenReturn(stream);
 
-        Assertions.assertThrows(RuntimeException.class,
+        Assertions.assertThrows(RegraDeNegocioException.class,
                 () -> fileStorageService.salvarArquivo(mockFile));
 
         Assertions.assertTrue(Files.list(tempDir).toList().isEmpty());
