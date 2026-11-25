@@ -1,10 +1,9 @@
-import axios from "axios"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import ItemCard from "@/components/shared/item-card"
 import type { Item, PageResponse } from "@/types/item"
-
-const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8080"
+import { Link } from "react-router"
+import api from "@/lib/axios"
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([])
@@ -21,7 +20,7 @@ export default function Home() {
       setError(null)
 
       try {
-        const response = await axios.get<PageResponse<Item>>(`${apiUrl}/v1/items/recentes`, {
+        const response = await api.get<PageResponse<Item>>(`/v1/items/recentes`, {
           headers: jwt ? { Authorization: `Bearer ${jwt}` } : {},
           signal: controller.signal,
           params: { page: 0, size: 12 },
@@ -41,42 +40,42 @@ export default function Home() {
   }, [reloadCount])
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 pb-12">
-      <section className="mb-10 flex min-h-64 flex-col items-center justify-center gap-4 rounded-3xl bg-sky-500 px-4 py-12 text-center text-white">
-        <h1 className="text-4xl font-semibold sm:text-6xl">Achados e Perdidos</h1>
-        <p className="max-w-2xl text-base sm:text-lg">
-          Encontre objetos perdidos ou ajude alguém a recuperar o que encontrou.
-        </p>
-        <div className="flex gap-4">
-          <Link
-					to="/cadastro/encontrado"
-					className="inline-flex h-9 w-24 items-center justify-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground no-underline transition-colors hover:bg-primary/80"
-					>
-						Achei
-					</Link>
+    <div className="pt-[256px]">
+      <section className="absolute top-0 left-0 right-0">
+        <div className="flex flex-col items-center justify-center gap-4 px-4 h-96 bg-sky-500">
+          <h1 className="text-center text-6xl m:text-4xl text-white font-medium">
+            Achados e Perdidos
+          </h1>
 
-					<Link
-					to="/cadastro/perdido"
-					className="inline-flex h-9 w-24 items-center justify-center rounded-lg bg-violet-700 px-2.5 text-sm font-medium text-white no-underline transition-colors hover:bg-violet-800"
-					>
-						Perdi
-					</Link>
+          <div className="flex gap-4">
+            <Link
+              to="/cadastro/encontrado"
+              className="inline-flex h-9 w-24 items-center justify-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground no-underline transition-colors hover:bg-primary/80"
+            >
+              Achei
+            </Link>
+
+            <Link
+              to="/cadastro/perdido"
+              className="inline-flex h-9 w-24 items-center justify-center rounded-lg bg-violet-700 px-2.5 text-sm font-medium text-white no-underline transition-colors hover:bg-violet-800"
+            >
+              Perdi
+            </Link>
+          </div>
         </div>
       </section>
 
       <section aria-labelledby="itens-recentes-titulo">
-        <div className="mb-5 flex items-end justify-between gap-4">
-          <div>
-            <h2 id="itens-recentes-titulo" className="text-2xl font-bold">Itens recentes</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Publicações que ainda estão ativas.</p>
-          </div>
+        <div className="mb-5">
+          <h2 id="itens-recentes-titulo" className="font-semibold">Itens recentes</h2>
+          <span className="text-sm text-muted-foreground">Todos os campi</span>
         </div>
 
         {isLoading ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-label="Carregando itens">
             {Array.from({ length: 8 }, (_, index) => (
               <div key={index} className="overflow-hidden rounded-2xl border bg-card">
-                <div className="aspect-[4/3] animate-pulse bg-muted" />
+                <div className="aspect-4/3 animate-pulse bg-muted" />
                 <div className="space-y-3 p-4">
                   <div className="h-5 w-2/3 animate-pulse rounded bg-muted" />
                   <div className="h-12 animate-pulse rounded bg-muted" />
@@ -96,7 +95,7 @@ export default function Home() {
             <p className="mt-2 text-sm text-muted-foreground">Quando houver novas publicações, elas aparecerão aqui.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
             {items.map((item) => <ItemCard key={item.idItem} item={item} />)}
           </div>
         )}
