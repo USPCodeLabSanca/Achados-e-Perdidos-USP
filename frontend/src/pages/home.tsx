@@ -48,8 +48,19 @@ export default function Home() {
           Encontre objetos perdidos ou ajude alguém a recuperar o que encontrou.
         </p>
         <div className="flex gap-4">
-          <Button size="lg" className="w-24">Achei</Button>
-          <Button size="lg" className="w-24 bg-[#4905FF] text-white hover:bg-[#3d04d6]">Perdi</Button>
+          <Link
+					to="/cadastro/encontrado"
+					className="inline-flex h-9 w-24 items-center justify-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground no-underline transition-colors hover:bg-primary/80"
+					>
+						Achei
+					</Link>
+
+					<Link
+					to="/cadastro/perdido"
+					className="inline-flex h-9 w-24 items-center justify-center rounded-lg bg-violet-700 px-2.5 text-sm font-medium text-white no-underline transition-colors hover:bg-violet-800"
+					>
+						Perdi
+					</Link>
         </div>
       </section>
 

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.usp.USPerdi.exception.ConflitoDeRecursoException;
 import com.usp.USPerdi.exception.RecursoNaoEncontradoException;
@@ -63,12 +64,12 @@ public class UsuarioService {
     // Retornamos USUARIO porque eh utilizado no ItemService
     public Usuario buscarPorEmailUSP(String emailUsp){
         return usuarioRepository.findByEmailUsp(emailUsp)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o e-mail: " + emailUsp));
+                .orElseThrow(() -> new ResponseStatusException(404, "Usuário não encontrado com o e-mail: " + emailUsp, null));
     }
 
     public Usuario buscarPorId(Long id){
         return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new ResponseStatusException(404, "Usuário não encontrado com o ID: " + id, null));
     }
 
 

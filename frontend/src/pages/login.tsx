@@ -1,23 +1,24 @@
 import { GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router';
-import axios from 'axios';
+import api from '../lib/axios';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function Login() {
+    const { refreshUser } = useAuth();
     const navigate = useNavigate();
 
     const handleLogin = async (credRes: any) => {
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/google`, {
+            const response = await api.post(`${import.meta.env.VITE_API_URL}/auth/google`, {
                 token: credRes.credential,
             });
 
             localStorage.setItem('jwt', response.data);
-
-            navigate('/');
+            await refreshUser();
+            navigate("/");
         } catch (e) {
             console.error(e);
         }
-
     }
     return (
         <div className="flex w-full flex-1 items-center justify-center">

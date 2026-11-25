@@ -71,6 +71,15 @@ public class UsuarioController {
         return ResponseEntity.status(200).body(usuarioService.buscaPorStatusDaConta(status, pageable));
     }
 
+    @GetMapping("/eu")
+    public ResponseEntity<UsuarioResponseDTO> obterUsuarioLogado(
+            @AuthenticationPrincipal Jwt jwt
+    ){
+        String email = jwt.getClaimAsString("email");
+
+        return ResponseEntity.status(200).body(usuarioService.obterPerfilUsuario(email));
+    }
+
 
     // UPDATE
 
