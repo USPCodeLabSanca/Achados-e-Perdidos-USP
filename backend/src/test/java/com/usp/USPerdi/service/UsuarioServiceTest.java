@@ -1,4 +1,6 @@
 package com.usp.USPerdi.service;
+import com.usp.USPerdi.exception.ConflitoDeRecursoException;
+import com.usp.USPerdi.exception.RecursoNaoEncontradoException;
 
 import com.usp.USPerdi.dto.UsuarioAtualizarPerfilDTO;
 import com.usp.USPerdi.dto.UsuarioCompletarCadastroDTO;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
 
 import java.time.Instant;
 import java.util.List;
@@ -85,7 +88,7 @@ class UsuarioServiceTest {
                 .thenReturn(Optional.of(existente));
 
         // Açao
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(ConflitoDeRecursoException.class,
                 () -> usuarioService.completarCadastro(dto, fotoGoogle));
 
         // Assert
@@ -136,7 +139,7 @@ class UsuarioServiceTest {
         // Açao
         // Assert
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RecursoNaoEncontradoException.class,
                 () -> usuarioService.buscarPorEmailUSP(email));
 
         verify(usuarioRepository).findByEmailUsp(email);
@@ -333,7 +336,7 @@ class UsuarioServiceTest {
         when(usuarioRepository.findByEmailUsp(email))
                 .thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RecursoNaoEncontradoException.class,
                 () -> usuarioService.desativarConta(email));
     }
 

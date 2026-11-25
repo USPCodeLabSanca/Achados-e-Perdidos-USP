@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.usp.USPerdi.exception.ConflitoDeRecursoException;
+import com.usp.USPerdi.exception.RecursoNaoEncontradoException;
+
 @Service
 @Validated
 public class UsuarioService {
@@ -36,7 +39,7 @@ public class UsuarioService {
 
         // 1. Verificar no BD se ja ha alguem cadastrado com esse email usp
         if (usuarioRepository.findByEmailUsp(dto.emailUsp()).isPresent()){
-            throw new IllegalArgumentException("Este e-mail USP já possui cadastro no sistema.");
+            throw new ConflitoDeRecursoException("Este e-mail USP já possui cadastro no sistema.");
         }
 
         // 2. Instanciar um usuário com as informações do DTO

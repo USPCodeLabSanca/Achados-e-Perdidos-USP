@@ -443,6 +443,10 @@ Temporary Items
 .history
 .ionide
 
+# Diretório local de uploads
+uploads/
+backend/uploads/
+
 # End of https://www.toptal.com/developers/gitignore/api/intellij,visualstudiocode,react,reactnative,java,maven
 # # Especifica arquivos para serem ignorados pelo git. Não serão adicionados ao projeto.
 # Por exemplo: builds, arquivos temporários e arquivos de ambiente.

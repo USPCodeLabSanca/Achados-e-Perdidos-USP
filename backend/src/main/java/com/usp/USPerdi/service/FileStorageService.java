@@ -1,18 +1,31 @@
 package com.usp.USPerdi.service;
 
+import com.usp.USPerdi.exception.ArmazenamentoArquivoException;
+import com.usp.USPerdi.exception.RegraDeNegocioException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Locale; 
+import java.util.Set;
 import java.util.UUID;
+
 
 @Service
 public class FileStorageService {
+
+    //Define quais extensões de arquivos são permitidas para upload de fotos
+    private static final Set<String> EXTENSOES_PERMITIDAS = Set.of(".jpg", ".jpeg", ".png", ".webp");
+    private static final Set<String> CONTENT_TYPES_PERMITIDOS = Set.of(
+            "image/jpeg", "image/jpg", "image/png", "image/webp"
+    );
 
     // Define que a pasta vai se chamar "uploads" na raiz do backend
     private Path pastaUploads = Paths.get("uploads");
@@ -25,21 +38,38 @@ public class FileStorageService {
             @Value("${app.uploads-dir:uploads}") String pastaUploads
     ) {
         this.apiBaseUrl = apiBaseUrl;
-        this.pastaUploads = Paths.get(pastaUploads);
+        this.pastaUploads = Paths.get(pastaUploads).toAbsolutePath().normalize();
 
         try {
             // Cria a pasta automaticamente quando o Spring iniciar
             Files.createDirectories(this.pastaUploads);
         } catch (IOException e) {
-            throw new RuntimeException("Não foi possível criar a pasta para upload de imagens.", e);
+            throw new ArmazenamentoArquivoException("Não foi possível criar a pasta para upload de imagens.", e);
         }
     }
 
     public String salvarArquivo(MultipartFile arquivo) {
+        // Validações iniciais do arquivo
+        if (arquivo == null || arquivo.isEmpty()) {
+            throw new RegraDeNegocioException("O arquivo da imagem é obrigatório.");
+        }
+    
+        String nomeOriginal = arquivo.getOriginalFilename();
+        if (nomeOriginal == null || nomeOriginal.isBlank() || !nomeOriginal.contains(".")) {
+            throw new RegraDeNegocioException("Nome de arquivo inválido ou sem extensão.");
+        }
+
+        String extensao = nomeOriginal.substring(nomeOriginal.lastIndexOf(".")).toLowerCase(Locale.ROOT);
+        if (!EXTENSOES_PERMITIDAS.contains(extensao)) {
+            throw new RegraDeNegocioException("Formato de imagem não permitido. Utilize JPG, JPEG, PNG ou WEBP.");
+        }
+
+        String contentType = arquivo.getContentType();
+        if (contentType != null && !contentType.isBlank()
+                && !CONTENT_TYPES_PERMITIDOS.contains(contentType.toLowerCase(Locale.ROOT))) {
+            throw new RegraDeNegocioException("Tipo de conteúdo inválido. Envie uma imagem válida (JPG, PNG ou WEBP).");
+        }
         try {
-            // 1. Pega a extensão original do arquivo (ex: .png, .jpg)
-            String nomeOriginal = arquivo.getOriginalFilename();
-            String extensao = nomeOriginal != null ? nomeOriginal.substring(nomeOriginal.lastIndexOf(".")) : ".jpg";
 
             // 2. Gera um nome único aleatório para não haver conflito
             String nomeNovo = UUID.randomUUID().toString() + extensao;
@@ -54,7 +84,7 @@ public class FileStorageService {
             return apiBaseUrl + "/uploads/" + nomeNovo;
 
         } catch (IOException e) {
-            throw new RuntimeException("Falha ao armazenar a imagem.", e);
+            throw new ArmazenamentoArquivoException("Falha ao armazenar a imagem.", e);
         }
     }
 
@@ -75,7 +105,8 @@ public class FileStorageService {
             // 3. Apaga o arquivo apenas se ele existir (deleteIfExists).
             // Isso evita que a API quebre (Erro 500) caso o arquivo já tenha sido deletado manualmente do servidor.
             Files.deleteIfExists(arquivoFisico);
-
+        } catch (InvalidPathException e) {
+            System.err.println("Aviso: Caminho de arquivo inválido ao tentar apagar: " + urlArquivo);
         } catch (IOException e) {
             // Apenas exibimos o erro no log.
             // Não lançamos RuntimeException aqui para não dar "Rollback" no banco de dados

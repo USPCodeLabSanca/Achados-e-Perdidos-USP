@@ -6,8 +6,6 @@ import com.usp.USPerdi.dto.ItemResponseDTO;
 import com.usp.USPerdi.model.StatusItem;
 import com.usp.USPerdi.service.ItemService;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -29,10 +27,28 @@ public class ItemController {
 
     // CREATE
 
+    @PostMapping(value = "/found", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ItemResponseDTO> publicarItemEncontrado(
+            @Valid @RequestPart("dados") ItemCadastrarNovoDTO itemDTO,
+            @RequestPart(value = "foto", required = false) MultipartFile foto,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return publicarItem(itemDTO, foto, jwt, StatusItem.encontrado);
+    }
+
+    @PostMapping(value = "/lost", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ItemResponseDTO> publicarItemPerdido(
+            @Valid @RequestPart("dados") ItemCadastrarNovoDTO itemDTO,
+            @RequestPart(value = "foto", required = false) MultipartFile foto,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return publicarItem(itemDTO, foto, jwt, StatusItem.perdido);
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ItemResponseDTO> criarItem(
             @Valid @RequestPart("dados") ItemCadastrarNovoDTO itemDTO,
-            @RequestPart("foto") MultipartFile foto,
+            @RequestPart(value = "foto", required = false) MultipartFile foto,
             @RequestParam("status") StatusItem status,
             @AuthenticationPrincipal Jwt jwt
     ) {
@@ -46,7 +62,24 @@ public class ItemController {
         ));
     }
 
+    private ResponseEntity<ItemResponseDTO> publicarItem(
+            ItemCadastrarNovoDTO itemDTO,
+            MultipartFile foto,
+            Jwt jwt,
+            StatusItem status
+    ) {
+        String emailUsp = jwt.getClaimAsString("email");
+        ItemResponseDTO itemPublicado = itemService.cadastrarNovoItem(emailUsp, itemDTO, foto, status);
+        return ResponseEntity.status(201).body(itemPublicado);
+    }
+
     // READ
+
+    // Lista os itens ainda ativos sem exigir um filtro, mantendo paginação.
+    @GetMapping("/recentes")
+    public ResponseEntity<Page<ItemResponseDTO>> listarItensRecentes(Pageable pageable) {
+        return ResponseEntity.ok(itemService.listarItensRecentes(pageable));
+    }
 
     @GetMapping("/busca/nome")
     public ResponseEntity<Page<ItemResponseDTO>> buscaPorNome(

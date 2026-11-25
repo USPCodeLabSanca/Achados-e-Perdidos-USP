@@ -62,7 +62,7 @@ public class SecurityConfig {
             .csrf((csrf) -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests((authorize) -> authorize
-                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/auth/**", "/uploads/**").permitAll()
                     .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

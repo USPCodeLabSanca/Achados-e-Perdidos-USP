@@ -16,6 +16,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     // Busca todos itens registrados por um usuario especifico
     Page<Item> findByUsuario(Usuario usuario, Pageable pageable);
 
+    // Lista os itens ainda ativos, dos mais recentemente cadastrados aos mais antigos.
+    Page<Item> findByStatusNotOrderByDataRegistroDesc(StatusItem status, Pageable pageable);
+
     // Busca itens filtrando pelo status e ordenando pela data de ocorrência (mais recentes primeiro)
     Page<Item> findByStatusOrderByDataOcorrenciaDesc(StatusItem status, Pageable pageable);
 
