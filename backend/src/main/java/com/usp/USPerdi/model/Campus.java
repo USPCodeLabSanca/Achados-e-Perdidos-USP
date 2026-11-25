@@ -9,6 +9,7 @@ public enum Campus {
     sao_carlos,
     ribeirao_preto,
     lorena,
+    bauru,
     pirassununga,
     santos,
     outro;
