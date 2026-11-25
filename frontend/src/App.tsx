@@ -4,6 +4,7 @@ import Home from "./pages/home"
 import Login from "./pages/login"
 import FoundItem from "./pages/found-item"
 import LostItem from "./pages/lost-item"
+import ItemDetails from "./pages/item-details"
 import { useAuth } from "@/contexts/auth-context"
 import RegistrationModal from "@/components/shared/registration-modal"
 import dayjs from 'dayjs';
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro/encontrado" element={<FoundItem />} />
           <Route path="/cadastro/perdido" element={<LostItem />} />
+          <Route path="/item/:id" element={<ItemDetails />} />
         </Route>
       </Routes>
       {!loading && userNotFound &&
