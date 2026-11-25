@@ -4,8 +4,8 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
                    WHERE n.nspname = 'public' AND t.typname = 'campus_enum') THEN
         CREATE TYPE public.campus_enum AS ENUM (
-            'sp-butanta', 'sp-centro', 'sp-quadrilatero', 'sp-leste',
-            'piracicaba', 'sao-carlos', 'ribeirao-preto', 'lorena',
+            'sp_butanta', 'sp_centro', 'sp_quadrilatero', 'sp_leste',
+            'piracicaba', 'sao_carlos', 'ribeirao-preto', 'lorena',
             'bauru', 'pirassununga', 'santos', 'outro'
         );
     END IF;

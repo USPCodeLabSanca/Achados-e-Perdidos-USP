@@ -40,4 +40,24 @@ BEGIN
     ) THEN
         ALTER TYPE public.campus_enum RENAME VALUE 'sp-leste' TO 'sp_leste';
     END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM pg_enum
+        WHERE enumtypid = 'public.campus_enum'::regtype AND enumlabel = 'sao-carlos'
+    ) AND NOT EXISTS (
+        SELECT 1 FROM pg_enum
+        WHERE enumtypid = 'public.campus_enum'::regtype AND enumlabel = 'sao_carlos'
+    ) THEN
+        ALTER TYPE public.campus_enum RENAME VALUE 'sao-carlos' TO 'sao_carlos';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM pg_enum
+        WHERE enumtypid = 'public.campus_enum'::regtype AND enumlabel = 'ribeirao-preto'
+    ) AND NOT EXISTS (
+        SELECT 1 FROM pg_enum
+        WHERE enumtypid = 'public.campus_enum'::regtype AND enumlabel = 'ribeirao_preto'
+    ) THEN
+        ALTER TYPE public.campus_enum RENAME VALUE 'ribeirao-preto' TO 'ribeirao_preto';
+    END IF;
 END $$;

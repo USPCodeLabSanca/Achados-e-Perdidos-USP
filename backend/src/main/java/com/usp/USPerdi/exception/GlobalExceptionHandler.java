@@ -13,12 +13,22 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.server.ResponseStatusException;
+import java.util.Map;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+@ExceptionHandler(ResponseStatusException.class)
+public ResponseEntity<Object> handleResponseStatus(ResponseStatusException ex) {
+    String mensagem = ex.getReason() != null ? ex.getReason() : "Erro na requisição";
+    return ResponseEntity
+            .status(ex.getStatusCode())
+            .body(Map.of("erro", mensagem));
+}
 
     // 1. Recurso não encontrado -> 404 Not Found
     @ExceptionHandler(RecursoNaoEncontradoException.class)
