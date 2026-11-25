@@ -8,7 +8,7 @@ export default function MainLayout() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
-      <main className="flex flex-1 flex-col p-2 typeset">
+      <main className="flex flex-1 flex-col p-8 typeset">
         <Outlet />
       </main>
       <Footer />

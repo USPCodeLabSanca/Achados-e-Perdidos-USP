@@ -1,60 +1,25 @@
-import { MapPin, PackageSearch } from "lucide-react"
-import { useState } from "react"
 import type { Item } from "@/types/item"
+import dayjs from 'dayjs';
 
-type ItemCardProps = {
-  item: Item
-}
 
-const statusLabels: Record<Item["status"], string> = {
-  perdido: "Perdido",
-  encontrado: "Achado",
-  recuperado: "Recuperado",
-}
+export default function ItemCard({ item }: { item: Item }) {
 
-export default function ItemCard({ item }: ItemCardProps) {
-  const [imagemComErro, setImagemComErro] = useState(false)
-  const statusStyle = item.status === "perdido"
-    ? "bg-rose-100 text-rose-800"
-    : "bg-emerald-100 text-emerald-800"
-
-  return (
-    <article className="overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-sm">
-      <div className="relative flex aspect-[4/3] items-center justify-center bg-muted">
-        {item.foto && !imagemComErro ? (
-          <img
-            src={item.foto}
-            alt={item.nome}
-            className="h-full w-full object-cover"
-            loading="lazy"
-            onError={() => setImagemComErro(true)}
-          />
-        ) : (
-          <div className="flex flex-col items-center gap-2 text-muted-foreground" aria-label="Sem foto disponível">
-            <PackageSearch aria-hidden="true" className="size-10" />
-            <span className="text-sm">Sem foto</span>
-          </div>
-        )}
-        <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-semibold ${statusStyle}`}>
-          {statusLabels[item.status] ?? "Item"}
-        </span>
-      </div>
-
-      <div className="flex min-h-48 flex-col p-4">
-        <div className="mb-2 flex items-start justify-between gap-3">
-          <h2 className="line-clamp-1 text-lg font-semibold" title={item.nome}>{item.nome}</h2>
-          <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
-            {item.tipo}
-          </span>
-        </div>
-        <p className="mb-4 line-clamp-3 flex-1 text-sm text-muted-foreground">
-          {item.descricao?.trim() || "Sem descrição."}
-        </p>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <MapPin aria-hidden="true" className="size-4 shrink-0" />
-          <span className="line-clamp-1">{item.local?.trim() || "Local não informado"}</span>
-        </div>
-      </div>
-    </article>
-  )
+    return (
+        <article className="flex flex-col rounded-2xl overflow-hidden">
+            <img className="w-full rounded-none mt-0 aspect-square object-cover" src={item.foto || ""} alt={item.descricao || ""} />
+            <div className="flex flex-col gap-8 bg-linear-to-b from-[#FFDD87] to-[#FFCA46] px-4 py-6">
+                <div className="flex flex-col gap-0">
+                    <h2 className="font-medium text-2xl mt-0">{item.nome}</h2>
+                    <span className="text-sm font-medium text-muted-foreground mt-0">{item.local}</span>
+                    <span className="text-sm font-medium text-muted-foreground first-letter:uppercase" title={item.dataOcorrencia || ""}>
+                        {dayjs(item.dataOcorrencia).fromNow()}
+                    </span>
+                </div>
+                <div className="flex gap-1 items-center">
+                    <img src={item.criadorFoto || ""} className="w-4 h-4 mt-0 rounded-full" />
+                    <span className="text-xs font-medium">{item.criadorNome}</span>
+                </div>
+            </div>
+        </article>
+    )
 }

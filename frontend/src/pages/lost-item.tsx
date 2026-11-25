@@ -1,85 +1,121 @@
 
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import api from "@/lib/axios";
+import React from "react";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+const tipos = [
+    { label: "Selecione o tipo", value: null },
+    { label: "Objeto", value: "objeto" },
+    { label: "Documento", value: "documento" },
+    { label: "Roupa", value: "roupa" },
+]
 
 export default function LostItem() {
+  const navigate = useNavigate();
+  const [nome, setNome] = React.useState("");
+  const [local, setLocal] = React.useState("");
+  const [data, setData] = React.useState("");
+  const [descricao, setDescricao] = React.useState("");
+  const [foto, setFoto] = React.useState<File | null>(null);
+  const [tipo, setTipo] = React.useState<string | null>(null);
+
+  const onSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+
+      formData.append(
+        "dados",
+        new Blob(
+          [JSON.stringify({
+            nome,
+            tipo,
+            local,
+            descricao,
+            dataOcorrencia: data || null,
+          })],
+          { type: "application/json" },
+        ),
+      );
+
+      if (foto) formData.append("foto", foto);
+
+      await api.post("/v1/items/lost", formData);
+      navigate("/");
+    } catch (error) {
+      console.error(error)
+    }
+
+  }
   return (
     <div className="flex flex-1 flex-col bg-[#FFF0D8]">
-      {/* Banner */}
-      <section className="flex min-h-48 flex-col items-center justify-center gap-4 rounded-b-2xl bg-sky-500 px-4 text-white">
-        <h1 className="text-center text-3xl font-medium sm:text-4xl">
-          Achados e Perdidos
-        </h1>
-
-        <div className="flex gap-4">
-            <Link
-            to="/cadastro/encontrado"
-            className="inline-flex h-9 w-24 items-center justify-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground no-underline hover:bg-primary/80"
-            >
-                Achei
-            </Link>
-
-            <Button
-            size="lg"
-            className="w-24 bg-violet-700 text-white hover:bg-violet-800"
-            >
-                Perdi
-            </Button>
-        </div>
-      </section>
-
       {/* Formulário */}
       <section className="mx-auto w-full max-w-6xl px-4 py-8">
         <h2 className="mb-3 font-semibold">
           Relatar um Item Perdido:
         </h2>
 
-        <form className="grid gap-10 rounded-md bg-white p-6 md:grid-cols-2 md:p-10">
-          {/* Campos */}
+        <form onSubmit={onSubmit} className="grid gap-10 rounded-md bg-white p-6 md:grid-cols-2 md:p-10">
+          {/* Campos de texto */}
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <label htmlFor="item" className="text-sm">
                 Item:
               </label>
-              <Input
-                id="item"
-                name="item"
-                placeholder="Nome do item"
-              />
+              <Input id="item" name="item" placeholder="Nome do item" value={nome} onChange={(e) => setNome(e.target.value)} />
             </div>
 
             <div className="flex flex-col gap-2">
               <label htmlFor="location" className="text-sm">
-                Último local onde foi visto:
+                Local onde encontrou:
               </label>
-              <Input
-                id="location"
-                name="location"
-                placeholder="Local"
-              />
+              <Input id="location" name="location" placeholder="Local" value={local} onChange={(e) => setLocal(e.target.value)} />
             </div>
 
             <div className="flex flex-col gap-2">
               <label htmlFor="date" className="text-sm">
-                Data em que perdeu:
+                Data em que encontrou:
               </label>
-              <Input
-                id="date"
-                name="date"
-                type="date"
-              />
+              <Input id="date" name="date" type="date" value={data} onChange={(e) => setData(e.target.value)} />
             </div>
 
+            <Select id="tipo-1" items={tipos} onValueChange={setTipo} value={tipo}>
+              <SelectTrigger className="w-full max-w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {tipos.map((tipo) => (
+                    <SelectItem key={tipo.value} value={tipo.value}>
+                      {tipo.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
             <div className="flex flex-col gap-2">
-              <label htmlFor="description" className="text-sm">
-                Descrição / Observações:
+              <label htmlFor="description" className="text-sm" >
+                Descrição:
               </label>
               <Textarea
                 id="description"
                 name="description"
-                placeholder="Descreva o item e outras informações importantes..."
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+
+                placeholder="Descreva o item..."
                 className="min-h-32 resize-y"
               />
             </div>
@@ -106,22 +142,23 @@ export default function LostItem() {
                   type="file"
                   accept="image/*"
                   className="sr-only"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setFoto(e.target.files[0]);
+                    }
+                  }}
                 />
               </label>
             </div>
 
             <div className="mt-auto flex justify-end gap-3">
-              <Link
-                to="/"
-                className="inline-flex h-9 w-24 items-center justify-center rounded-lg border border-neutral-300 text-sm no-underline hover:bg-neutral-100"
-              >
-                Cancelar
+              <Link to="/">
+                <Button variant="ghost">
+                  Cancelar
+                </Button>
               </Link>
 
-              <Button
-                type="button"
-                className="w-24 bg-violet-700 text-white hover:bg-violet-800"
-              >
+              <Button type="submit">
                 Postar
               </Button>
             </div>

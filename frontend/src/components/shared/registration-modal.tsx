@@ -28,7 +28,7 @@ import { useAuth } from "@/contexts/auth-context"
 import React from "react"
 
 const campi = [
-    { label: "Select a fruit", value: null },
+    { label: "Selecione seu campus", value: null },
     { label: "São Paulo", value: "sp_butanta" },
     { label: "Piracicaba", value: "piracicaba" },
     { label: "São Carlos", value: "sao_carlos" },
