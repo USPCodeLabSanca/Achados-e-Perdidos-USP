@@ -112,13 +112,19 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ItemResponseDTO>> buscaPorLocal(
-            @RequestParam("local") String local,
+    public ResponseEntity<Page<ItemResponseDTO>> listarOuBuscarPorLocal(
+            @RequestParam(value = "local", required = false) String local,
             Pageable pageable
     ) {
-        return ResponseEntity.ok().body(
-                itemService.buscarPorLocal(local, pageable)
-        );
+        if (local != null && !local.isBlank()) {
+            return ResponseEntity.ok(itemService.buscarPorLocal(local, pageable));
+        }
+        return ResponseEntity.ok(itemService.listarItensRecentes(pageable));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ItemResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(ItemResponseDTO.fromItem(itemService.buscarPorId(id)));
     }
 
     // Update

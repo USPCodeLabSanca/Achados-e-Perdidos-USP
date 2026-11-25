@@ -615,4 +615,50 @@ class ItemServiceTest {
         assertEquals(0, retorno.getTotalElements());
     }
 
+    @Test
+    void deveListarItensRecentesExcluindoRecuperados() {
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Usuario usuario = new Usuario(
+                1L,
+                "Maria Silva",
+                "maria@usp.br",
+                "16999999999",
+                Campus.sao_carlos,
+                StatusConta.ativa,
+                "https://google.test/maria.png",
+                Instant.now()
+        );
+
+        Item achado = new Item();
+        achado.setIdItem(1L);
+        achado.setNome("Garrafa Azul");
+        achado.setLocal("ICMC");
+        achado.setStatus(StatusItem.encontrado);
+        achado.setFoto("http://localhost:8080/uploads/garrafa.png");
+        achado.setUsuario(usuario);
+        achado.setDataOcorrencia(LocalDate.now());
+
+        Item perdido = new Item();
+        perdido.setIdItem(2L);
+        perdido.setNome("Chaveiro");
+        perdido.setLocal("EESC");
+        perdido.setStatus(StatusItem.perdido);
+        perdido.setFoto("http://localhost:8080/uploads/chaveiro.png");
+        perdido.setUsuario(usuario);
+        perdido.setDataOcorrencia(LocalDate.now());
+
+        Page<Item> pageItens = new PageImpl<>(List.of(achado, perdido), pageable, 2);
+
+        when(itemRepository.findByStatusNotOrderByDataRegistroDesc(StatusItem.recuperado, pageable))
+                .thenReturn(pageItens);
+
+        Page<ItemResponseDTO> retorno = itemService.listarItensRecentes(pageable);
+
+        verify(itemRepository).findByStatusNotOrderByDataRegistroDesc(StatusItem.recuperado, pageable);
+        assertEquals(2, retorno.getTotalElements());
+        assertEquals(ItemResponseDTO.fromItem(achado), retorno.getContent().get(0));
+        assertEquals(ItemResponseDTO.fromItem(perdido), retorno.getContent().get(1));
+    }
+
 }
